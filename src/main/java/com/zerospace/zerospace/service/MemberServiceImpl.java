@@ -4,6 +4,7 @@ import com.zerospace.zerospace.domain.Member;
 import com.zerospace.zerospace.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -23,17 +24,12 @@ public class MemberServiceImpl implements MemberService{
         }
     }
 
+    @Transactional
     @Override
-    public void join(String email, String nickName) {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] randomBytes = new byte[24];
-        secureRandom.nextBytes(randomBytes);
-
-        String userId =  Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-
+    public void join(String email, String nickName, String userId) {
         Member member = new Member(userId, email, nickName);
-
         memberRepository.save(member);
+
     }
 
     @Override

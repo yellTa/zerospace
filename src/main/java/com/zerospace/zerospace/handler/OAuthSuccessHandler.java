@@ -12,6 +12,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Map;
 
 import java.io.IOException;
@@ -41,11 +43,20 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if(!memberService.hasMember(email)){
-            memberService.join(email,nickName);
-        }else{//위에는 회원 없을 때 회원 가입하는거
-            //아래는 회원 있으니까 JWT토큰 발급하면 됨 근데 else 뺴고 WJT토
+            String userId = createUserId();
+            memberService.join(email,nickName,userId);
         }
 
 
+
+    }
+
+    private String createUserId(){
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] randomBytes = new byte[24];
+        secureRandom.nextBytes(randomBytes);
+
+        String userId =  Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        return userId;
     }
 }

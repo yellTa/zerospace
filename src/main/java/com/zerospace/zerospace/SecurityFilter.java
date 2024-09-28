@@ -16,7 +16,6 @@ public class SecurityFilter {
 
     @Bean
     public SecurityFilterChain OAuthAndJWTValidationFilter(HttpSecurity httpSecurity,OAuthSuccessHandler successHandler) throws Exception{
-        log.info("start");
         httpSecurity
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/kakao")
