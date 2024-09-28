@@ -7,5 +7,6 @@ public interface MemberService {
 
     public void join(String email,String nickName, String userId);
 
-    public Member findMember();
+    public String getMemberuserId(String email);
+
 }

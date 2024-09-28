@@ -33,7 +33,9 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public Member findMember() {
-        return null;
+    public String getMemberuserId(String email) {
+        Member foundMember = memberRepository.findMemberByEmail(email);
+
+        return foundMember.getUserId();
     }
 }

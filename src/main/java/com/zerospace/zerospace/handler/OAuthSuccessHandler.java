@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.handler;
 
+import com.zerospace.zerospace.service.JWTTokenService;
 import com.zerospace.zerospace.service.MemberService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -18,12 +21,15 @@ import java.util.Map;
 
 import java.io.IOException;
 
+import static com.zerospace.zerospace.Const.Const.REFRESH_TOKEN_VALIDITY_SECONDS;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final MemberService memberService;
+    private final JWTTokenService jwtTokenService;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
@@ -31,7 +37,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         String email ="";
         String nickName="";
-
+        String userId="";
         if(userAttributes.containsKey("kakao_account")){
             Map<String, Object> kakaoAccount = (Map<String, Object>) userAttributes.get("kakao_account");
             email = (String) kakaoAccount.get("email");
@@ -43,11 +49,28 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if(!memberService.hasMember(email)){
-            String userId = createUserId();
+            userId = createUserId();
             memberService.join(email,nickName,userId);
+        }else{
+            userId = memberService.getMemberuserId(email);
         }
+        String accessToken = jwtTokenService.createAcecssToken(userId);
+        String refreshToken = jwtTokenService.createRefreshToken(userId);
 
 
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(REFRESH_TOKEN_VALIDITY_SECONDS)
+                .sameSite("none")  // Prevent CSRF
+                .build();
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
 
     }
 
