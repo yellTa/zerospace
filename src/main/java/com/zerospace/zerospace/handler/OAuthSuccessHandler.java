@@ -2,13 +2,11 @@ package com.zerospace.zerospace.handler;
 
 import com.zerospace.zerospace.service.JWTTokenService;
 import com.zerospace.zerospace.service.MemberService;
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,7 +19,7 @@ import java.util.Map;
 
 import java.io.IOException;
 
-import static com.zerospace.zerospace.Const.Const.REFRESH_TOKEN_VALIDITY_SECONDS;
+import static com.zerospace.zerospace.Const.Const.*;
 
 @Component
 @Slf4j
@@ -58,13 +56,13 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtTokenService.createRefreshToken(userId);
 
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        response.setHeader(ACCESS_TOKEN_NAME, "Bearer " + accessToken);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_NAME, refreshToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .maxAge(REFRESH_TOKEN_VALIDITY_SECONDS)
-                .sameSite("none")  // Prevent CSRF
+                .sameSite("none")
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
