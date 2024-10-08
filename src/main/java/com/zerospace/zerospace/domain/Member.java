@@ -15,9 +15,7 @@ public class Member {
     private String nickName;
 
     public Member(){
-
     }
-
     public Member(String userId, String email, String nickName){
         this.userId = userId;
         this.email = email;

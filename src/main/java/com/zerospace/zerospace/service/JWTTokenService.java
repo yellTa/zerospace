@@ -7,9 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +20,6 @@ import static com.zerospace.zerospace.Const.Const.*;
 
 @Component
 public class JWTTokenService {
-
 
     public String createAcecssToken(String userId) {
         Instant now = Instant.now();
@@ -41,7 +38,7 @@ public class JWTTokenService {
         Instant now = Instant.now();
         String refreshToken = Jwts.builder()
                 .setSubject(userId)
-                .setIssuer("zeosapce")
+                .setIssuer("zerospace")
                 .setIssuedAt(Date.from(now))
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY_SECONDS))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -52,7 +49,7 @@ public class JWTTokenService {
 
     public String getAccessToken(HttpServletRequest request) {
         String token = request.getHeader(ACCESS_TOKEN_NAME);
-        if(token ==null)return "";
+        if (token == null) return "";
         return token.substring(7);
     }
 
@@ -68,20 +65,20 @@ public class JWTTokenService {
         return null;
     }
 
-    public boolean isTokenValidate(String token){
-        try{
+    public boolean isTokenValidate(String token) {
+        try {
             Claims claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY)
                     .parseClaimsJwt(token)
                     .getBody();
             return true;
-        }catch(SignatureException e){
+        } catch (SignatureException e) {
             return false;
         }
     }
 
-    public boolean isTokenExpired(String token){
-        try{
+    public boolean isTokenExpired(String token) {
+        try {
             Claims claims = Jwts.parser()
                     .parseClaimsJwt(token)
                     .getBody();
@@ -90,7 +87,7 @@ public class JWTTokenService {
 
             //만료되면 true
             return expiration.before(new Date());
-        }catch(ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             return true;
         }
     }
@@ -103,7 +100,8 @@ public class JWTTokenService {
 
         return claims.getSubject();
     }
-    public ResponseCookie deleteRefreshToken(){
+
+    public ResponseCookie deleteRefreshToken() {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
