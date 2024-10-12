@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
+//@Component
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORSFilter implements Filter {

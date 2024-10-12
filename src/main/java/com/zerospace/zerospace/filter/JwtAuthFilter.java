@@ -16,7 +16,7 @@ import java.io.IOException;
 
 import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 @Order(1)

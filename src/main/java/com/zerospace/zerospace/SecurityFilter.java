@@ -12,8 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
-@EnableWebSecurity
-@Configuration
+//@EnableWebSecurity
+//@Configuration
 @Slf4j
 public class SecurityFilter {
 
@@ -28,11 +28,11 @@ public class SecurityFilter {
     @Bean
     public SecurityFilterChain OAuthAndJWTValidationFilter(HttpSecurity httpSecurity,OAuthSuccessHandler successHandler) throws Exception{
         httpSecurity
-                .addFilterBefore(corsFilter, OAuth2LoginAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthFilter, OAuth2LoginAuthenticationFilter.class)
+//                .addFilterBefore(corsFilter, OAuth2LoginAuthenticationFilter.class)
+//                .addFilterBefore(jwtAuthFilter, OAuth2LoginAuthenticationFilter.class)
                 .authorizeRequests(authorize -> authorize
                         // 로그인 없이 접근 가능한 URI 설정
-                        .requestMatchers("/apiTest2/**", "/resources/**", "/static/**", "/login", "/").permitAll()
+                        .requestMatchers("/calendar/platform","/resources/**", "/static/**", "/login", "/").permitAll()
                         // 그 외의 요청은 인증이 필요
                         .anyRequest().authenticated()
                 )
