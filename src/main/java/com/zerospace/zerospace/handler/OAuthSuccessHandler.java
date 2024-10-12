@@ -1,6 +1,6 @@
 package com.zerospace.zerospace.handler;
 
-import com.zerospace.zerospace.service.JWTTokenService;
+import com.zerospace.zerospace.service.utils.JWTTokenService;
 import com.zerospace.zerospace.service.MemberService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

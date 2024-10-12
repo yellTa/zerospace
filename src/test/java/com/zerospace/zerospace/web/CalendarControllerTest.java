@@ -31,10 +31,10 @@ class CalendarControllerTest {
     @Test
     public void testPostWithFormData() throws Exception {
         mockMvc.perform(post("/calendar/platform")
-                        .param("userId" ,"123123")
-                        .param("email", "ggggg@gmail.com")
+                        .param("userId" ,"testId")
+                        .param("email", "601atelier@naver.com")
                         .param("platform", "hourplace")
-                        .param("password", "1123123")
+                        .param("password", "Rhfdhkd1!!")
                         .with(csrf()))  // 최신 CSRF 사용법
                 .andExpect(status().isOk());  // 상태 코드 검증
     }

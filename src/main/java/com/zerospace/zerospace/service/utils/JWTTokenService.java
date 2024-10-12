@@ -1,4 +1,4 @@
-package com.zerospace.zerospace.service;
+package com.zerospace.zerospace.service.utils;
 
 
 import io.jsonwebtoken.Claims;

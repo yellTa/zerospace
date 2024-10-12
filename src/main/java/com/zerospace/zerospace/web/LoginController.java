@@ -1,6 +1,6 @@
 package com.zerospace.zerospace.web;
 
-import com.zerospace.zerospace.service.JWTTokenService;
+import com.zerospace.zerospace.service.utils.JWTTokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
