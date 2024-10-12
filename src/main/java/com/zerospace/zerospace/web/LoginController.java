@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class LoginController {
     private final OAuth2AuthorizedClientService authorizedClientService;
-
     private final JWTTokenService jwtTokenService;
 
     @GetMapping("/logout")
