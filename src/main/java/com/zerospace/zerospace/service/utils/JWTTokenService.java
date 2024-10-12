@@ -109,7 +109,6 @@ public class JWTTokenService {
                 .maxAge(0)  // 쿠키 만료 시간을 0으로 설정하여 삭제
                 .sameSite("None")
                 .build();
-
         return refreshTokenCookie;
     }
 

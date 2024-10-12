@@ -18,12 +18,24 @@ public class CalendarController {
     private final CalendarServiceImpl calendarService;
 
     @PostMapping("/platform")
-    public ResponseEntity saveplatformInfo(HttpServletRequest request,
-                                           @RequestParam String platform,
-                                           @RequestParam String password,
-                                           @RequestParam String email) {
-        calendarService.saveHourplaceAccount(platform, email, password, request);
-        return new ResponseEntity("hello", HttpStatus.OK);
+    public ResponseEntity<?> saveplatformInfo(HttpServletRequest request,
+                                              @RequestParam String platform,
+                                              @RequestParam String password,
+                                              @RequestParam String email) {
+        try {
+            calendarService.saveHourplaceAccount(platform, email, password, request);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity("success", HttpStatus.OK);
     }
 
+
+    @GetMapping("/data")
+    public ResponseEntity<?> calendarConnection(HttpServletRequest request) {
+        calendarService.getCalendarInfo(request);
+
+
+        return new ResponseEntity("hello", HttpStatus.OK);
+    }
 }
