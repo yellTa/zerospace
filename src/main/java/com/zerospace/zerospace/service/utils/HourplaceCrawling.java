@@ -54,7 +54,7 @@ public class HourplaceCrawling {
             }
             return driver;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info(e.toString());
             return null;
         }
     }

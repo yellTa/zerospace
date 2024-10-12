@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SpacecloudAccountRepository extends JpaRepository<SpacecloudAccount, Integer> {
 
-    SpacecloudAccount findByuserId(String userId);
-
+    SpacecloudAccount findByUserId(String userId);
 }

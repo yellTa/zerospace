@@ -10,15 +10,15 @@ import lombok.Data;
 public class SpacecloudAccount {
     @Id
     private String userId;
-    private String hourplaceEmail;
-    private String hourplacePassword;
+    private String spacecloudEmail;
+    private String spacecloudPassword;
 
     public SpacecloudAccount() {
     }
 
     public SpacecloudAccount(String userId, String hourplaceEmail, String hourplacePassword) {
         this.userId = userId;
-        this.hourplaceEmail = hourplaceEmail;
-        this.hourplacePassword = hourplacePassword;
+        this.spacecloudEmail = hourplaceEmail;
+        this.spacecloudPassword = hourplacePassword;
     }
 }

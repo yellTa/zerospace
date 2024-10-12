@@ -31,7 +31,12 @@ class CrawlingLogicTest {
 
     @Test
     void loginCheck2() {
-        ResponseEntity<?> responseEntity = crawlingLogic.loginCheck("hourplace", "testId");
-        log.info(responseEntity.toString());
+       crawlingLogic.loginCheck("hourplace", "testId");
+
+    }
+
+    @Test
+    public void lobinCheck3(){
+        crawlingLogic.loginCheck("spacecloud", "testId");
     }
 }
