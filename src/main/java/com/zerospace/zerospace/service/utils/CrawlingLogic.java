@@ -1,14 +1,12 @@
 package com.zerospace.zerospace.service.utils;
 
-import com.zerospace.zerospace.domain.HourplaceAccount;
-import com.zerospace.zerospace.domain.SpacecloudAccount;
+import com.zerospace.zerospace.exception.LoginFailedException;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,14 +27,16 @@ public class CrawlingLogic {
             //id pw가져오기
             id = hourplaceAccount.findByUserId(userId).getHourplaceEmail();
             password = hourplaceAccount.findByUserId(userId).getHourplacePassword();
+
             try {
                 driver = hourplaceCrawling.hourplaceLogin(id, password);
                 if (driver == null) {
-                    return null;
+                    log.info("spacecloud login failed!");
+                    return driver;
                 }
             } catch (Exception e) {
                 log.info(e.toString());
-
+                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             }
 
 
@@ -47,15 +47,29 @@ public class CrawlingLogic {
             try {
                 driver = spacecloudCrawling.spacecloudLogin(id, password);
                 if (driver == null) {
-                    log.info("loginfailed");
+                    log.info("spacecloud login failed!");
                     return null;
                 }
             } catch (Exception e) {
+
                 log.info(e.toString());
+                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             }
         }
 
         return driver;
     }
+
+    public void crawlingLogic(String platform){
+        if(platform.equals("hourplace")){
+
+        }else if(platform.equals("spacecloud")){
+
+        }
+
+
+
+    }
+
 
 }

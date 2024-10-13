@@ -2,12 +2,14 @@ package com.zerospace.zerospace.service;
 
 import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.domain.SpacecloudAccount;
+import com.zerospace.zerospace.exception.LoginFailedException;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
 import com.zerospace.zerospace.service.utils.CrawlingLogic;
 import com.zerospace.zerospace.service.utils.JWTTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CalendarServiceImpl {
     private final JWTTokenService jwtTokenService;
     private final HourplaceAccountRepository hourplaceAccountRepository;
@@ -54,26 +57,27 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
-        //사용자 계정정보 가져와서 로그인 수행하기
-        //hourplace 사용자 정보 가져오기
         String accessToken = jwtTokenService.getAccessToken(request);
         String userId = jwtTokenService.getUserIdFromToken(accessToken);
 
-        WebDriver hourplaceDriver = crawlingLogic.loginCheck("hourplace", userId);
-        if (hourplaceDriver == null) {
-            return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+        try{
+            WebDriver hourplaceDriver = crawlingLogic.loginCheck("hourplace", userId);
+            if (hourplaceDriver == null) {
+                return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+            }
+        }catch(LoginFailedException e){
+            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
-        //맞으면 hourplace 크롤링 수행
 
+        crawlingLogic.crawlingLogic("hourplace");
 
-        //spacecloud 사용자 정보 가져오기
         WebDriver spacecloudDriver = crawlingLogic.loginCheck("spacecloud", userId);
         if (spacecloudDriver == null) {
             return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
         }
 
-        // 로그인이 맞으면 크롤링 비교하기
-
+        crawlingLogic.crawlingLogic("spacecloud");
 
         //날짜별 클릭수 저장하기
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository

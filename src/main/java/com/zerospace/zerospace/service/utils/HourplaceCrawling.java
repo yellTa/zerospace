@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service.utils;
 
+import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -47,6 +48,7 @@ public class HourplaceCrawling {
             Thread.sleep(500);
             WebElement check = driver.findElement(By.xpath("//*[@id=\"login_vue\"]/div/div[3]/div[3]/p"));
             String checkMessage = check.getText();
+
             if (checkMessage.contains("이메일 및 비밀번호를 확인해 주세요.")) {
                 driver.close();
                 driver.quit();
@@ -55,7 +57,7 @@ public class HourplaceCrawling {
             return driver;
         } catch (Exception e) {
             log.info(e.toString());
-            return null;
+            throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
         }
     }
 

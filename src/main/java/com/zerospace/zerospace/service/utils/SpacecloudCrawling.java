@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service.utils;
 
+import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,7 @@ public class SpacecloudCrawling {
 
         } catch (Exception e) {
             log.info(e.toString());
+            throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
         }
 
         return driver;
