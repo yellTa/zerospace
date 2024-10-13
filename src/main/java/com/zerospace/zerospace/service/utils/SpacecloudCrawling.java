@@ -15,6 +15,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ import java.time.Duration;
 public class SpacecloudCrawling {
 
     public WebDriver spacecloudLogin(String id, String password) {
-        WebDriver driver=null;
+        WebDriver driver = null;
         try {
             WebDriverManager.chromedriver().setup();
 
@@ -81,4 +85,77 @@ public class SpacecloudCrawling {
         return driver;
     }
 
+    public void spacecloudGetInfo(WebDriver driver) {
+        try {
+            //예약 정보 가져오기
+            List<WebElement> list = driver.findElements(By.cssSelector("article.list_box"));
+            log.info("size olf list  = {}", list.size());
+
+            //hourplace 20개 spacecloud : 10개
+            for (int i = 0; i < Math.min(list.size(), 5); i++) {
+                log.info("----------------");
+                WebElement div = list.get(i);
+
+                WebElement place = div.findElement(By.cssSelector("dd.place"));
+                log.info("place  = {}", place.getText());
+
+                WebElement time = div.findElement(By.cssSelector("dd.date"));
+                log.info("time = {}", time.getText());
+                divideDateData(time.getText());
+
+                WebElement price = div.findElement(By.cssSelector("p.price"));
+                log.info("price = {}", price.getText());
+
+                WebElement process = div.findElement(By.cssSelector("span.tag"));
+                log.info("process = {}", process.getText());
+
+                WebElement reservationNumber = div.findElement(By.cssSelector("span.reservation_num"));
+                log.info(reservationNumber.getText());
+
+
+            }
+
+            driver.close();
+            driver.quit();
+        } catch (Exception e) {
+
+            driver.close();
+            driver.quit();
+        }
+    }
+
+    private void divideDateData(String text) {
+
+        // Extracting year, month, day using regex
+        Pattern datePattern = Pattern.compile("(\\d{4})\\.(\\d{2})\\.(\\d{2})");
+        Matcher dateMatcher = datePattern.matcher(text);
+
+        int year = 0, month = 0, day = 0;
+        if (dateMatcher.find()) {
+            year = Integer.parseInt(dateMatcher.group(1));
+            month = Integer.parseInt(dateMatcher.group(2));
+            day = Integer.parseInt(dateMatcher.group(3));
+        }
+
+        // Extracting start and end times using regex
+        Pattern timePattern = Pattern.compile("(\\d{2})~(\\d{2}) 시");
+        Matcher timeMatcher = timePattern.matcher(text);
+
+        LocalTime startTime = null;
+        LocalTime endTime = null;
+        if (timeMatcher.find()) {
+            int startHour = Integer.parseInt(timeMatcher.group(1));
+            int endHour = Integer.parseInt(timeMatcher.group(2));
+
+            // Convert hours to LocalTime
+            startTime = LocalTime.of(startHour, 0);
+            endTime = LocalTime.of(endHour, 0);
+        }
+
+        log.info("year : " + year);
+        log.info("month : " + month);
+        log.info("days : " + day);
+        log.info("startTime : " + startTime);
+        log.info("endTime : " + endTime);
+    }
 }

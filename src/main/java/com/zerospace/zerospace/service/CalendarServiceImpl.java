@@ -54,30 +54,37 @@ public class CalendarServiceImpl {
 
     }
 
-
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
         String accessToken = jwtTokenService.getAccessToken(request);
         String userId = jwtTokenService.getUserIdFromToken(accessToken);
-
-        try{
-            WebDriver hourplaceDriver = crawlingLogic.loginCheck("hourplace", userId);
-            if (hourplaceDriver == null) {
+        WebDriver driver = null;
+        try {
+            driver = crawlingLogic.loginCheck("hourplace", userId);
+            if (driver == null) {
+                log.info("hourplace 계정이 일차히지 않음");
                 return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
             }
-        }catch(LoginFailedException e){
+        } catch (LoginFailedException e) {
+            log.info("hourplace 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
+        crawlingLogic.crawlingLogic("hourplace", driver);
 
-        crawlingLogic.crawlingLogic("hourplace");
-
-        WebDriver spacecloudDriver = crawlingLogic.loginCheck("spacecloud", userId);
-        if (spacecloudDriver == null) {
-            return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+        driver = null;
+        try {
+            driver = crawlingLogic.loginCheck("spacecloud", userId);
+            if (driver == null) {
+                log.info("spacecloud 계정이 일차히지 않음");
+                return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (LoginFailedException e) {
+            log.info("spacecloud 알 수 없는 에러 발생");
+            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        crawlingLogic.crawlingLogic("spacecloud");
+        crawlingLogic.crawlingLogic("spacecloud", driver);
 
         //날짜별 클릭수 저장하기
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository

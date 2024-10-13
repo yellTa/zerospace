@@ -60,16 +60,15 @@ public class CrawlingLogic {
         return driver;
     }
 
-    public void crawlingLogic(String platform){
-        if(platform.equals("hourplace")){
+    public void crawlingLogic(String platform, WebDriver driver) {
 
-        }else if(platform.equals("spacecloud")){
-
+        if (platform.equals("hourplace")) {
+            hourplaceCrawling.hourspaceGetInfo(driver);
+        } else if (platform.equals("spacecloud")) {
+            spacecloudCrawling.spacecloudGetInfo(driver);
         }
 
 
-
     }
-
 
 }
