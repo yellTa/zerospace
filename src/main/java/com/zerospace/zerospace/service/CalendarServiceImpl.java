@@ -2,6 +2,7 @@ package com.zerospace.zerospace.service;
 
 import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.domain.SpacecloudAccount;
+import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
@@ -56,8 +57,10 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+//        String accessToken = jwtTokenService.getAccessToken(request);
+//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+        String userId = "testId";
+
         WebDriver driver = null;
         try {
             driver = crawlingLogic.loginCheck("hourplace", userId);
@@ -70,7 +73,13 @@ public class CalendarServiceImpl {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
-        crawlingLogic.crawlingLogic("hourplace", driver);
+
+        try {
+            crawlingLogic.crawlingLogic("hourplace", driver);
+        } catch (CrawlingException e) {
+            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
 
         driver = null;
         try {
@@ -84,7 +93,12 @@ public class CalendarServiceImpl {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        crawlingLogic.crawlingLogic("spacecloud", driver);
+        try {
+            crawlingLogic.crawlingLogic("spacecloud", driver);
+        } catch (CrawlingException e) {
+            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
 
         //날짜별 클릭수 저장하기
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository

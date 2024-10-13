@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service.utils;
 
+import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +90,7 @@ public class HourplaceCrawling {
                 //시간
                 WebElement timeAndPlace = div.findElement(By.cssSelector("div.w-\\[429px\\].text-default.font-normal.text-gray080"));
                 WebElement time = timeAndPlace.findElement(By.cssSelector("p.w-full.text-ellipsis.whitespace-pre-wrap.break-words.text-default.font-normal.text-gray080.line-clamp-1"));
+                log.info(time.getText());
                 divideDateData(time.getText());
 
                 //장소이름
@@ -107,6 +109,15 @@ public class HourplaceCrawling {
                 //예약현황
                 WebElement reservationNumber = div.findElement(By.cssSelector("span.text-default.font-normal.text-gray080"));
                 log.info("reservationNumber = {}", reservationNumber.getText());
+
+                //예약자명
+                WebElement customer = div.findElement(By.cssSelector("p.ml-1.text-ellipsis.whitespace-pre-line.break-words.text-default.font-normal.text-gray080.line-clamp-1"));
+                log.info("customer = {}", customer.getText());
+
+                //링크
+                String bookinglink = "https://hourplace.co.kr/booking/" + reservationNumber.getText();
+                log.info("booking link = {}", bookinglink);
+
             }
             //끝나면 driver  닫기
 
@@ -114,16 +125,18 @@ public class HourplaceCrawling {
             driver.quit();
 
         } catch (Exception e) {
+            log.info(e.toString());
             driver.close();
             driver.quit();
+            throw new CrawlingException("알 수 없는 에러가 발생했습니다. 다시 시도해주세요");
+
         }
     }
 
-
     private void divideDateData(String text) {
 
-        // Extracting year, month, day using regex
-        Pattern datePattern = Pattern.compile("(\\d{4})\\.(\\d{2})\\.(\\d{2})");
+
+        Pattern datePattern = Pattern.compile("(\\d{4})년 (\\d{1,2})월 (\\d{1,2})일");
         Matcher dateMatcher = datePattern.matcher(text);
 
         int year = 0, month = 0, day = 0;
@@ -134,18 +147,17 @@ public class HourplaceCrawling {
         }
 
         // Extracting start and end times using regex
-        Pattern timePattern = Pattern.compile("(\\d{2})~(\\d{2}) 시");
+        Pattern timePattern = Pattern.compile("(오전|오후) (\\d{2}:\\d{2}) ~ (오전|오후) (\\d{2}:\\d{2})");
         Matcher timeMatcher = timePattern.matcher(text);
 
         LocalTime startTime = null;
         LocalTime endTime = null;
         if (timeMatcher.find()) {
-            int startHour = Integer.parseInt(timeMatcher.group(1));
-            int endHour = Integer.parseInt(timeMatcher.group(2));
+            // Parse start time and convert if it's PM
+            startTime = parseTime(timeMatcher.group(1), timeMatcher.group(2));
 
-            // Convert hours to LocalTime
-            startTime = LocalTime.of(startHour, 0);
-            endTime = LocalTime.of(endHour, 0);
+            // Parse end time and convert if it's PM
+            endTime = parseTime(timeMatcher.group(3), timeMatcher.group(4));
         }
 
         log.info("year : " + year);
@@ -155,4 +167,14 @@ public class HourplaceCrawling {
         log.info("endTime : " + endTime);
     }
 
+    // Helper method to parse time and handle AM/PM
+    private static LocalTime parseTime(String period, String time) {
+        LocalTime parsedTime = LocalTime.parse(time);
+
+        // If it's PM and not 12:00 PM, add 12 hours to convert to 24-hour format
+        if (period.equals("오후") && !parsedTime.equals(LocalTime.NOON)) {
+            parsedTime = parsedTime.plusHours(12);
+        }
+        return parsedTime;
+    }
 }

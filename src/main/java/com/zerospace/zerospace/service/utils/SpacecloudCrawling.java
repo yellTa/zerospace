@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service.utils;
 
+import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +93,7 @@ public class SpacecloudCrawling {
             log.info("size olf list  = {}", list.size());
 
             //hourplace 20개 spacecloud : 10개
-            for (int i = 0; i < Math.min(list.size(), 5); i++) {
+            for (int i = 0; i < Math.min(list.size(), 10); i++) {
                 log.info("----------------");
                 WebElement div = list.get(i);
 
@@ -112,15 +113,21 @@ public class SpacecloudCrawling {
                 WebElement reservationNumber = div.findElement(By.cssSelector("span.reservation_num"));
                 log.info(reservationNumber.getText());
 
+                WebElement customer = div.findElement(By.cssSelector("dd.sub_detail"));
+                log.info("customer= {}", customer.getText().split("\n")[0]);
+
+                String bookinglink = "https://partner.spacecloud.kr/reservation/" + reservationNumber.getText();
+                log.info("spaceBooking = {}", bookinglink);
 
             }
 
             driver.close();
             driver.quit();
         } catch (Exception e) {
-
+            log.info(e.toString());
             driver.close();
             driver.quit();
+            throw new CrawlingException("알 수 없는 에러가 발생했습니다. 다시 시도해주세요");
         }
     }
 
@@ -138,7 +145,7 @@ public class SpacecloudCrawling {
         }
 
         // Extracting start and end times using regex
-        Pattern timePattern = Pattern.compile("(\\d{2})~(\\d{2}) 시");
+        Pattern timePattern = Pattern.compile("(\\d{1,2})~(\\d{1,2}) 시");
         Matcher timeMatcher = timePattern.matcher(text);
 
         LocalTime startTime = null;

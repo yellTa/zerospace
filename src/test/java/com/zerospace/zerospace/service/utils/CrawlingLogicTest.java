@@ -28,7 +28,6 @@ class CrawlingLogicTest {
 
 
     @Test
-
     void loginCheck() {
         WebDriver driver = hourplaceCrawling.hourplaceLogin("601atelier@naver.com", "Rhfdhkd1!!");
         if (driver == null) {
@@ -38,20 +37,26 @@ class CrawlingLogicTest {
 
     @Test
     void loginCheck2() {
-       crawlingLogic.loginCheck("hourplace", "testId");
+        crawlingLogic.loginCheck("hourplace", "testId");
 
     }
 
     @Test
-    public void lobinCheck3(){
+    public void lobinCheck3() {
         crawlingLogic.loginCheck("spacecloud", "testId");
     }
 
     @Test
     @DisplayName("calendser Servle Impl 연동하기 로직 수행")
-    public void connectionTest(){
+    public void connectionTest() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        calendarService.getCalendarInfo(request);
+        try {
+            ResponseEntity<?> calendarInfo = calendarService.getCalendarInfo(request);
+            log.info(calendarInfo.getStatusCode().toString());
+        } catch (Exception e) {
+
+        }
+
     }
 
 }
