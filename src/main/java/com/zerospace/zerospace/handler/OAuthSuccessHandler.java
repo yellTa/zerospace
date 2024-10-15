@@ -69,7 +69,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
+        log.info("forwarded");
         request.getRequestDispatcher("/login/oauth2/code/kakao").forward(request, response);
     }
 

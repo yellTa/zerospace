@@ -24,9 +24,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("OAuth fileter start ===============================");
+        log.info("OAuth filter start ===============================");
         String accessToken = "";
         String refreshToken = "";
+
+        // 요청 URI 가져오기
+        String requestURI = request.getRequestURI();
+        log.info("JWT requestURI = {}", requestURI);
+        // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
+        if (requestURI.startsWith("/login/oauth2/code/kakao") ||
+                requestURI.startsWith("/loginResult") ||
+                requestURI.startsWith("/oauth2/authorization/kakao") ||
+                requestURI.startsWith("calendar") || requestURI.startsWith("error")) {
+            // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
+            log.info("JWT Token skip URI = {}", requestURI);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             accessToken = jwtTokenService.getAccessToken(request);
@@ -34,18 +48,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             response.getWriter().write("Invalid access");
             log.info(e.toString());
-            return;
-        }
-
-
-        // 요청 URI 가져오기
-        String requestURI = request.getRequestURI();
-        log.info("JWT requestURI = {}", requestURI);
-        // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
-        if (requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("calendar") || requestURI.startsWith("error")) {
-            // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
-            log.info(requestURI);
-            filterChain.doFilter(request, response);
             return;
         }
 

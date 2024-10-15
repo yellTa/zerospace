@@ -39,8 +39,9 @@ public class SecurityFilter {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("https://zzerospace.store:8080/oauth2/authorization/kakao")
-                        .successHandler(successHandler)
-
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("/loginResult");
+                        })
                 );
         return httpSecurity.build();
     }
