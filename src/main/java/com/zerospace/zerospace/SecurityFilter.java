@@ -17,8 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @Slf4j
 public class SecurityFilter {
-
-
     private final JwtAuthFilter jwtAuthFilter;
     private final CORSFilter corsFilter;
 
@@ -44,7 +42,6 @@ public class SecurityFilter {
                         .successHandler(successHandler)
 
                 );
-
         return httpSecurity.build();
     }
 }

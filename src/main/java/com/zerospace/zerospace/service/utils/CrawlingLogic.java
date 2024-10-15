@@ -29,8 +29,6 @@ public class CrawlingLogic {
         String id = "";
         String password = "";
 
-
-
         WebDriver driver = null;
 
         if (platform.equals("hourplace")) {
