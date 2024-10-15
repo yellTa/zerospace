@@ -1,5 +1,6 @@
-package com.zerospace.zerospace.service.utils;
+package com.zerospace.zerospace.service.utils.platformCrawling;
 
+import com.zerospace.zerospace.domain.CalendarInfo;
 import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -19,6 +20,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,15 +31,18 @@ import java.util.regex.Pattern;
 public class SpacecloudCrawling {
 
     public WebDriver spacecloudLogin(String id, String password) {
-        WebDriver driver = null;
+
         try {
             WebDriverManager.chromedriver().setup();
-
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+            options.addArguments("--headless=new");
+            options.addArguments("--single-process");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
 
             //암시적 대기, size설정
-            driver = new ChromeDriver(options);
+            WebDriver driver = new ChromeDriver(options);
             driver.manage().window().setSize(new Dimension(1024, 4000));
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(120));
 
@@ -79,16 +84,18 @@ public class SpacecloudCrawling {
             WebElement reservationCheckBtn = driver.findElement(By.xpath("//*[@id=\"all_menu\"]/div/div/div/ul/li[1]/a/span[1]"));
             reservationCheckBtn.click();
 
-
+            return driver;
         } catch (Exception e) {
             log.info(e.toString());
             throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
         }
 
-        return driver;
+
     }
 
-    public void spacecloudGetInfo(WebDriver driver) {
+    public ArrayList<CalendarInfo> spacecloudGetInfo(WebDriver driver) {
+        ArrayList<CalendarInfo> result = new ArrayList<>();
+
         try {
             //예약 정보 가져오기
             List<WebElement> list = driver.findElements(By.cssSelector("article.list_box"));
@@ -99,28 +106,38 @@ public class SpacecloudCrawling {
                 log.info("----------------");
                 WebElement div = list.get(i);
 
-                WebElement place = div.findElement(By.cssSelector("dd.place"));
-                log.info("place  = {}", place.getText());
+                CalendarInfo calendarInfo = new CalendarInfo();
+                calendarInfo.setPlatform("spacecloud");
+
+                WebElement location = div.findElement(By.cssSelector("dd.place"));
+                log.info("location  = {}", location.getText());
+                calendarInfo.setLocation(location.getText());
 
                 WebElement time = div.findElement(By.cssSelector("dd.date"));
                 log.info("time = {}", time.getText());
-                divideDateData(time.getText());
+                calendarInfo = divideDateData(time.getText(), calendarInfo);
 
                 WebElement price = div.findElement(By.cssSelector("p.price"));
                 log.info("price = {}", price.getText());
+                calendarInfo.setPrice(price.getText());
 
                 WebElement process = div.findElement(By.cssSelector("span.tag"));
                 log.info("process = {}", process.getText());
+                calendarInfo.setProcess(process.getText());
 
                 WebElement reservationNumber = div.findElement(By.cssSelector("span.reservation_num"));
                 log.info(reservationNumber.getText());
+                calendarInfo.setRevervationNumber(reservationNumber.getText().split(" ")[1]);
 
                 WebElement customer = div.findElement(By.cssSelector("dd.sub_detail"));
                 log.info("customer= {}", customer.getText().split("\n")[0]);
+                calendarInfo.setCustomer(customer.getText().split("\n")[0]);
 
                 String bookinglink = "https://partner.spacecloud.kr/reservation/" + reservationNumber.getText().split(" ")[1];
                 log.info("spaceBooking = {}", bookinglink);
+                calendarInfo.setLink(bookinglink);
 
+                result.add(calendarInfo);
             }
 
             driver.close();
@@ -131,9 +148,10 @@ public class SpacecloudCrawling {
             driver.quit();
             throw new CrawlingException("알 수 없는 에러가 발생했습니다. 다시 시도해주세요");
         }
+        return result;
     }
 
-    public void divideDateData(String text) {
+    public CalendarInfo divideDateData(String text, CalendarInfo calendarInfo) {
         // 첫 번째 패턴: 2024.10.31 (목) 23시 ~ 2024.11.01 (금) 1시, 2시간
         Pattern firstPattern = Pattern.compile("(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2}) \\(.*?\\) (\\d{1,2})시 ~ (\\d{4})\\.(\\d{1,2})\\.(\\d{1,2}) \\(.*?\\) (\\d{1,2})시");
         // 두 번째 패턴: 2024.10.12(토) 18~19 시, 1 시간
@@ -141,6 +159,9 @@ public class SpacecloudCrawling {
 
         Matcher firstMatcher = firstPattern.matcher(text);
         Matcher secondMatcher = secondPattern.matcher(text);
+
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
 
         if (firstMatcher.find()) {
             int startYear = Integer.parseInt(firstMatcher.group(1));
@@ -159,8 +180,8 @@ public class SpacecloudCrawling {
             LocalTime startTime = LocalTime.of(startHour, 0);
             LocalTime endTime = LocalTime.of(endHour, 0);
 
-            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
-            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            startDateTime = LocalDateTime.of(startDate, startTime);
+            endDateTime = LocalDateTime.of(endDate, endTime);
 
             log.info("Start DateTime: " + startDateTime);
             log.info("End DateTime: " + endDateTime);
@@ -177,14 +198,21 @@ public class SpacecloudCrawling {
             LocalTime startTime = LocalTime.of(startHour, 0);
             LocalTime endTime = LocalTime.of(endHour, 0);
 
-            LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
-            LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+            startDateTime = LocalDateTime.of(date, startTime);
+            endDateTime = LocalDateTime.of(date, endTime);
 
             log.info("Start DateTime: " + startDateTime);
             log.info("End DateTime: " + endDateTime);
 
         } else {
-            System.out.println("Pattern did not match");
+            log.info("Pattern did not match");
         }
+
+        // CalendarInfo에 LocalDateTime 저장
+        calendarInfo.setStartTime(startDateTime);
+        calendarInfo.setEndTime(endDateTime);
+
+        return calendarInfo;
     }
+
 }

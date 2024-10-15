@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service;
 
+import com.zerospace.zerospace.domain.CalendarInfo;
 import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.domain.SpacecloudAccount;
 import com.zerospace.zerospace.exception.CrawlingException;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +68,7 @@ public class CalendarServiceImpl {
         try {
             driver = crawlingLogic.loginCheck("hourplace", userId);
             if (driver == null) {
-                log.info("hourplace 계정이 일차히지 않음");
+                log.info("hourplace 계정이 일치하지 않음");
                 return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
             }
         } catch (LoginFailedException e) {
@@ -74,8 +77,9 @@ public class CalendarServiceImpl {
 
         }
 
+        ArrayList<CalendarInfo> hourplaceInfo = new ArrayList<>();
         try {
-            crawlingLogic.crawlingLogic("hourplace", driver);
+            hourplaceInfo = crawlingLogic.crawlingLogic("hourplace", driver);
         } catch (CrawlingException e) {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -85,7 +89,7 @@ public class CalendarServiceImpl {
         try {
             driver = crawlingLogic.loginCheck("spacecloud", userId);
             if (driver == null) {
-                log.info("spacecloud 계정이 일차히지 않음");
+                log.info("spacecloud 계정이 일치하지 않음");
                 return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
             }
         } catch (LoginFailedException e) {
@@ -93,13 +97,21 @@ public class CalendarServiceImpl {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        ArrayList<CalendarInfo> spacecloud = new ArrayList<>();
+
         try {
-            crawlingLogic.crawlingLogic("spacecloud", driver);
+            spacecloud = crawlingLogic.crawlingLogic("spacecloud", driver);
         } catch (CrawlingException e) {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        ArrayList<CalendarInfo> crawlingResult = new ArrayList<>();
+        crawlingResult.addAll(hourplaceInfo);
+        crawlingResult.addAll(spacecloud);
 
+        for(CalendarInfo cal : crawlingResult){
+            log.info(cal.toString());
+        }
         //날짜별 클릭수 저장하기
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository
 

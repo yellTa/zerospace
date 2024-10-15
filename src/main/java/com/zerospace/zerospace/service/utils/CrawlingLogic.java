@@ -1,13 +1,20 @@
 package com.zerospace.zerospace.service.utils;
 
+import com.zerospace.zerospace.domain.CalendarInfo;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
+import com.zerospace.zerospace.service.utils.platformCrawling.HourplaceCrawling;
+import com.zerospace.zerospace.service.utils.platformCrawling.SpacecloudCrawling;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +29,10 @@ public class CrawlingLogic {
         String id = "";
         String password = "";
 
+
+
         WebDriver driver = null;
+
         if (platform.equals("hourplace")) {
             //id pw가져오기
             id = hourplaceAccount.findByUserId(userId).getHourplaceEmail();
@@ -59,13 +69,16 @@ public class CrawlingLogic {
         return driver;
     }
 
-    public void crawlingLogic(String platform, WebDriver driver) {
-
+    public ArrayList<CalendarInfo> crawlingLogic(String platform, WebDriver driver) {
+        ArrayList<CalendarInfo> result = new ArrayList<>();
         if (platform.equals("hourplace")) {
-            hourplaceCrawling.hourspaceGetInfo(driver);
+            result = hourplaceCrawling.hourspaceGetInfo(driver);
+
         } else if (platform.equals("spacecloud")) {
-            spacecloudCrawling.spacecloudGetInfo(driver);
+            result = spacecloudCrawling.spacecloudGetInfo(driver);
         }
+
+        return result;
     }
 
 }

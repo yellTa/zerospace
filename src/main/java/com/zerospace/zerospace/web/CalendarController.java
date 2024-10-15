@@ -34,8 +34,6 @@ public class CalendarController {
     @GetMapping("/data")
     public ResponseEntity<?> calendarConnection(HttpServletRequest request) {
         calendarService.getCalendarInfo(request);
-
-
         return new ResponseEntity("hello", HttpStatus.OK);
     }
 }

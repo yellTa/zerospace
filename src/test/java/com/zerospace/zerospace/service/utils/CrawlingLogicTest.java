@@ -1,9 +1,7 @@
 package com.zerospace.zerospace.service.utils;
 
-import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.service.CalendarServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import com.zerospace.zerospace.service.utils.platformCrawling.HourplaceCrawling;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +22,7 @@ class CrawlingLogicTest {
     private CrawlingLogic crawlingLogic;
 
     @Autowired
-    private CalendarServiceImpl calendarService;
+    private CalendarServiceImpl calendarServiceImpl;
 
 
     @Test
@@ -47,11 +45,11 @@ class CrawlingLogicTest {
     }
 
     @Test
-    @DisplayName("calendser Servle Impl 연동하기 로직 수행")
+    @DisplayName("calendser Servle Impl의 crawling 로직 수행")
     public void connectionTest() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         try {
-            ResponseEntity<?> calendarInfo = calendarService.getCalendarInfo(request);
+            ResponseEntity<?> calendarInfo = calendarServiceImpl.getCalendarInfo(request);
             log.info(calendarInfo.getStatusCode().toString());
         } catch (Exception e) {
 
