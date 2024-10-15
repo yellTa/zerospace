@@ -25,8 +25,7 @@ public class CalendarInfo {
     private String platform;
     private String process;
     private String customer;
-    private String revervationNumber;
+    private String reservationNumber;
     private String link;
-
 
 }

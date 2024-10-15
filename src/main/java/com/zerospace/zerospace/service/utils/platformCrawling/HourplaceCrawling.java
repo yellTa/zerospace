@@ -118,7 +118,7 @@ public class HourplaceCrawling {
 
                 WebElement reservationNumber = div.findElement(By.cssSelector("span.text-default.font-normal.text-gray080"));
                 log.info("reservationNumber = {}", reservationNumber.getText());
-                calendarInfo.setRevervationNumber(reservationNumber.getText());
+                calendarInfo.setReservationNumber(reservationNumber.getText());
 
                 WebElement customer = div.findElement(By.cssSelector("p.ml-1.text-ellipsis.whitespace-pre-line.break-words.text-default.font-normal.text-gray080.line-clamp-1"));
                 log.info("customer = {}", customer.getText());

@@ -127,7 +127,7 @@ public class SpacecloudCrawling {
 
                 WebElement reservationNumber = div.findElement(By.cssSelector("span.reservation_num"));
                 log.info(reservationNumber.getText());
-                calendarInfo.setRevervationNumber(reservationNumber.getText().split(" ")[1]);
+                calendarInfo.setReservationNumber(reservationNumber.getText().split(" ")[1]);
 
                 WebElement customer = div.findElement(By.cssSelector("dd.sub_detail"));
                 log.info("customer= {}", customer.getText().split("\n")[0]);

@@ -5,6 +5,7 @@ import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.domain.SpacecloudAccount;
 import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
+import com.zerospace.zerospace.repository.CalendarInfoRepository;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
 import com.zerospace.zerospace.service.utils.CrawlingLogic;
@@ -28,6 +29,7 @@ public class CalendarServiceImpl {
     private final HourplaceAccountRepository hourplaceAccountRepository;
     private final SpacecloudAccountRepository spacecloudAccountRepository;
     private final CrawlingLogic crawlingLogic;
+    private final CalendarInfoRepository calendarInfoRepository;
 
     @Transactional
     public void saveHourplaceAccount(String platform, String email, String password, HttpServletRequest request) {
@@ -63,7 +65,6 @@ public class CalendarServiceImpl {
 //        String accessToken = jwtTokenService.getAccessToken(request);
 //        String userId = jwtTokenService.getUserIdFromToken(accessToken);
         String userId = "testId";
-
         WebDriver driver = null;
         try {
             driver = crawlingLogic.loginCheck("hourplace", userId);
@@ -109,12 +110,45 @@ public class CalendarServiceImpl {
         crawlingResult.addAll(hourplaceInfo);
         crawlingResult.addAll(spacecloud);
 
-        for(CalendarInfo cal : crawlingResult){
-            log.info(cal.toString());
+        //DB에 넣는 작업 수행하기
+        try {
+            calendarConnectionSave(crawlingResult);
+        } catch (Exception e) {
+            log.info(e.toString());
+            new ResponseEntity<>("오류가 발생했습니다!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+
         //날짜별 클릭수 저장하기
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository
 
+
+
         return new ResponseEntity<>("success", HttpStatus.OK);
+    }
+
+    public void calendarConnectionSave(ArrayList<CalendarInfo> crawlingData) throws Exception {
+
+        for (CalendarInfo cal : crawlingData) {
+            String number = cal.getReservationNumber();
+            log.info(cal.toString() + " \n");
+            CalendarInfo foundCal = calendarInfoRepository.findByReservationNumber(number);
+
+            if (foundCal == null) {
+                calendarInfoRepository.save(cal);
+            } else {
+                foundCal.setStartTime(cal.getStartTime());
+                foundCal.setEndTime(cal.getEndTime());
+                foundCal.setPrice(cal.getPrice());
+                foundCal.setLocation(cal.getLocation());
+                foundCal.setPlatform(cal.getPlatform());
+                foundCal.setProcess(cal.getProcess());
+                foundCal.setCustomer(cal.getCustomer());
+                foundCal.setReservationNumber(cal.getReservationNumber());
+                foundCal.setLink(cal.getLink());
+
+                calendarInfoRepository.save(foundCal);
+            }
+        }
     }
 }
