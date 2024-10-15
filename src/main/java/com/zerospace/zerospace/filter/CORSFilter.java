@@ -12,12 +12,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-//@Component
+@Component
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORSFilter implements Filter {
 
     private static final List<String> allowedOrigins = Arrays.asList(
+            //여기에 버셀주소 적으면 되는거임
             "https://localhost:3000",
             "http://localhost:3000",
             "https://localhost:3030"
@@ -34,6 +35,12 @@ public class CORSFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
 
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.startsWith("/oauth2/authorization/kakao") || requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("/error")) {
+            chain.doFilter(req, res); // 필터를 넘기고 바로 리턴
+            return;
+        }
         log.info("CORS fILTER START =============================================");
         log.info(request.getRequestURI());
         String userAgent = request.getHeader("User-Agent");
@@ -41,13 +48,9 @@ public class CORSFilter implements Filter {
 
         String origin = request.getHeader("Origin");
 
-        if (origin != null && allowedOrigins.contains(origin)) {
+        if (allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
-        } else {
-            // Optionally, you can set a default origin or log if the origin is not allowed
-            log.warn("Origin not allowed: {}", origin);
         }
-
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me, Authorization, cache-control");

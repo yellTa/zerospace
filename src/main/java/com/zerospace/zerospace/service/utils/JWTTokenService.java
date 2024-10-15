@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import static com.zerospace.zerospace.Const.Const.*;
 
 
 @Component
+@Slf4j
 public class JWTTokenService {
 
     public String createAcecssToken(String userId) {
@@ -49,7 +51,17 @@ public class JWTTokenService {
 
     public String getAccessToken(HttpServletRequest request) {
         String token = request.getHeader(ACCESS_TOKEN_NAME);
-        if (token == null) return "";
+
+        if (token == null || token.isEmpty()) {
+            log.warn("Access token is missing");
+            return "";
+        }
+
+        if (token.length() < 7 || !token.startsWith("Bearer ")) {
+            log.warn("Invalid access token format");
+            return "";
+        }
+
         return token.substring(7);
     }
 

@@ -52,6 +52,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }else{
             userId = memberService.getMemberuserId(email);
         }
+        log.info("created AccessToken and Refresh Token");
         String accessToken = jwtTokenService.createAcecssToken(userId);
         String refreshToken = jwtTokenService.createRefreshToken(userId);
 
@@ -69,7 +70,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
-
     }
 
     private String createUserId(){

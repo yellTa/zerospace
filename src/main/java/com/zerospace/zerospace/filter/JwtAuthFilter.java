@@ -8,32 +8,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
 
-//@Component
+@Component
 @RequiredArgsConstructor
 @Slf4j
 @Order(1)
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JWTTokenService jwtTokenService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = jwtTokenService.getAccessToken(request);
         String refreshToken = jwtTokenService.getRefreshToken(request);
-
+        log.info("OAuth fileter start ===============================");
         // 요청 URI 가져오기
         String requestURI = request.getRequestURI();
-
-        log.info(requestURI);
+        log.info("JWT requestURI = {}",requestURI);
         // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
-        if (requestURI.contains("/login/oauth2/code/kakao") || requestURI.contains("apiTest2")) {
-            log.info(requestURI);
+        if (requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("calendar") || requestURI.startsWith("error")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
             log.info(requestURI);
             filterChain.doFilter(request, response);
@@ -76,8 +74,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.info(e.toString());
         }
-
-
     }
 
 }
