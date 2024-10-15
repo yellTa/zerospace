@@ -1,6 +1,7 @@
 package com.zerospace.zerospace.web;
 
 import com.zerospace.zerospace.service.utils.JWTTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
+
 @Controller
 @RequiredArgsConstructor
 public class LoginController {
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final JWTTokenService jwtTokenService;
+
+    @GetMapping("/login/oauth2/code/kakao")
+    public String oauth2Redirect(HttpServletResponse response, HttpServletRequest request){
+
+        return request.getHeader(ACCESS_TOKEN_NAME);
+    }
 
     @GetMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session, OAuth2AuthenticationToken authentication, HttpServletResponse response) {

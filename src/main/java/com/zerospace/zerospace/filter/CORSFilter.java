@@ -21,8 +21,7 @@ public class CORSFilter implements Filter {
             //여기에 버셀주소 적으면 되는거임
             "https://localhost:3000",
             "http://localhost:3000",
-            "https://localhost:3030"
-//            "https://zero-space-service.vercel.app/"
+            "https://zero-space-service.vercel.app/"
     );
 
     @Override

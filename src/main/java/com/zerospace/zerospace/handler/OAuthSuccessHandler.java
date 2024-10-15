@@ -36,6 +36,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String email ="";
         String nickName="";
         String userId="";
+
         if(userAttributes.containsKey("kakao_account")){
             Map<String, Object> kakaoAccount = (Map<String, Object>) userAttributes.get("kakao_account");
             email = (String) kakaoAccount.get("email");
@@ -56,7 +57,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenService.createAcecssToken(userId);
         String refreshToken = jwtTokenService.createRefreshToken(userId);
 
-
         response.setHeader(ACCESS_TOKEN_NAME, "Bearer " + accessToken);
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_NAME, refreshToken)
                 .httpOnly(true)
@@ -69,7 +69,8 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
+
+        request.getRequestDispatcher("/login/oauth2/code/kakao").forward(request, response);
     }
 
     private String createUserId(){

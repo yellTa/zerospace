@@ -24,12 +24,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String refreshToken = jwtTokenService.getRefreshToken(request);
         log.info("OAuth fileter start ===============================");
+        String accessToken = "";
+        String refreshToken = "";
+
+        try {
+            accessToken = jwtTokenService.getAccessToken(request);
+            refreshToken = jwtTokenService.getRefreshToken(request);
+        } catch (Exception e) {
+            response.getWriter().write("Invalid access");
+            log.info(e.toString());
+            return;
+        }
+
+
         // 요청 URI 가져오기
         String requestURI = request.getRequestURI();
-        log.info("JWT requestURI = {}",requestURI);
+        log.info("JWT requestURI = {}", requestURI);
         // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
         if (requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("calendar") || requestURI.startsWith("error")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
@@ -53,7 +64,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         String userId = jwtTokenService.getUserIdFromToken(accessToken);
                         String createdAccessToken = jwtTokenService.createAcecssToken(userId);
                         response.setHeader(ACCESS_TOKEN_NAME, createdAccessToken);
-
                     } else {
                         //유효하지 않은경우
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -70,10 +80,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 response.addHeader("Set-Cookie", responseCookie.toString());
                 response.getWriter().write("No accessToken");
             }
-
         } catch (Exception e) {
             log.info(e.toString());
         }
     }
-
 }
