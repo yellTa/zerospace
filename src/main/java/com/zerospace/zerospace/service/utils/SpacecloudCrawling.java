@@ -16,6 +16,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -116,7 +118,7 @@ public class SpacecloudCrawling {
                 WebElement customer = div.findElement(By.cssSelector("dd.sub_detail"));
                 log.info("customer= {}", customer.getText().split("\n")[0]);
 
-                String bookinglink = "https://partner.spacecloud.kr/reservation/" + reservationNumber.getText();
+                String bookinglink = "https://partner.spacecloud.kr/reservation/" + reservationNumber.getText().split(" ")[1];
                 log.info("spaceBooking = {}", bookinglink);
 
             }
@@ -131,38 +133,58 @@ public class SpacecloudCrawling {
         }
     }
 
-    private void divideDateData(String text) {
+    public void divideDateData(String text) {
+        // 첫 번째 패턴: 2024.10.31 (목) 23시 ~ 2024.11.01 (금) 1시, 2시간
+        Pattern firstPattern = Pattern.compile("(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2}) \\(.*?\\) (\\d{1,2})시 ~ (\\d{4})\\.(\\d{1,2})\\.(\\d{1,2}) \\(.*?\\) (\\d{1,2})시");
+        // 두 번째 패턴: 2024.10.12(토) 18~19 시, 1 시간
+        Pattern secondPattern = Pattern.compile("(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})\\(.*?\\) (\\d{1,2})~(\\d{1,2}) 시");
 
-        // Extracting year, month, day using regex
-        Pattern datePattern = Pattern.compile("(\\d{4})\\.(\\d{2})\\.(\\d{2})");
-        Matcher dateMatcher = datePattern.matcher(text);
+        Matcher firstMatcher = firstPattern.matcher(text);
+        Matcher secondMatcher = secondPattern.matcher(text);
 
-        int year = 0, month = 0, day = 0;
-        if (dateMatcher.find()) {
-            year = Integer.parseInt(dateMatcher.group(1));
-            month = Integer.parseInt(dateMatcher.group(2));
-            day = Integer.parseInt(dateMatcher.group(3));
+        if (firstMatcher.find()) {
+            int startYear = Integer.parseInt(firstMatcher.group(1));
+            int startMonth = Integer.parseInt(firstMatcher.group(2));
+            int startDay = Integer.parseInt(firstMatcher.group(3));
+            int startHour = Integer.parseInt(firstMatcher.group(4));
+
+            int endYear = Integer.parseInt(firstMatcher.group(5));
+            int endMonth = Integer.parseInt(firstMatcher.group(6));
+            int endDay = Integer.parseInt(firstMatcher.group(7));
+            int endHour = Integer.parseInt(firstMatcher.group(8));
+
+            LocalDate startDate = LocalDate.of(startYear, startMonth, startDay);
+            LocalDate endDate = LocalDate.of(endYear, endMonth, endDay);
+
+            LocalTime startTime = LocalTime.of(startHour, 0);
+            LocalTime endTime = LocalTime.of(endHour, 0);
+
+            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+
+            log.info("Start DateTime: " + startDateTime);
+            log.info("End DateTime: " + endDateTime);
+
+        } else if (secondMatcher.find()) {
+            int year = Integer.parseInt(secondMatcher.group(1));
+            int month = Integer.parseInt(secondMatcher.group(2));
+            int day = Integer.parseInt(secondMatcher.group(3));
+            int startHour = Integer.parseInt(secondMatcher.group(4));
+            int endHour = Integer.parseInt(secondMatcher.group(5));
+
+            LocalDate date = LocalDate.of(year, month, day);
+
+            LocalTime startTime = LocalTime.of(startHour, 0);
+            LocalTime endTime = LocalTime.of(endHour, 0);
+
+            LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+            log.info("Start DateTime: " + startDateTime);
+            log.info("End DateTime: " + endDateTime);
+
+        } else {
+            System.out.println("Pattern did not match");
         }
-
-        // Extracting start and end times using regex
-        Pattern timePattern = Pattern.compile("(\\d{1,2})~(\\d{1,2}) 시");
-        Matcher timeMatcher = timePattern.matcher(text);
-
-        LocalTime startTime = null;
-        LocalTime endTime = null;
-        if (timeMatcher.find()) {
-            int startHour = Integer.parseInt(timeMatcher.group(1));
-            int endHour = Integer.parseInt(timeMatcher.group(2));
-
-            // Convert hours to LocalTime
-            startTime = LocalTime.of(startHour, 0);
-            endTime = LocalTime.of(endHour, 0);
-        }
-
-        log.info("year : " + year);
-        log.info("month : " + month);
-        log.info("days : " + day);
-        log.info("startTime : " + startTime);
-        log.info("endTime : " + endTime);
     }
 }

@@ -31,7 +31,7 @@ public class CrawlingLogic {
             try {
                 driver = hourplaceCrawling.hourplaceLogin(id, password);
                 if (driver == null) {
-                    log.info("spacecloud login failed!");
+                    log.info("hourplace login failed!");
                     return driver;
                 }
             } catch (Exception e) {
@@ -66,8 +66,6 @@ public class CrawlingLogic {
         } else if (platform.equals("spacecloud")) {
             spacecloudCrawling.spacecloudGetInfo(driver);
         }
-
-
     }
 
 }
