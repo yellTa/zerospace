@@ -9,5 +9,4 @@ public class ZerospaceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ZerospaceApplication.class, args);
 	}
-
 }

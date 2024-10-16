@@ -14,10 +14,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @Configuration
 @Slf4j
-public class SecurityFilter {
+public class Config {
     private final CORSFilter corsFilter;
 
-    public SecurityFilter(CORSFilter corsFilter) {
+    public Config(CORSFilter corsFilter) {
         this.corsFilter = corsFilter;
     }
 
