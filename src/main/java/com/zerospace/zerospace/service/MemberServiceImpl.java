@@ -11,10 +11,10 @@ import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
-public class MemberServiceImpl implements MemberService{
+public class MemberServiceImpl {
     private final MemberRepository memberRepository;
 
-    @Override
+
     public boolean hasMember(String email) {
         Member foundMember = memberRepository.findMemberByEmail(email);
         if(foundMember ==null){
@@ -25,17 +25,22 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Transactional
-    @Override
     public void join(String email, String nickName, String userId) {
         Member member = new Member(userId, email, nickName);
         memberRepository.save(member);
 
     }
 
-    @Override
+
     public String getMemberuserId(String email) {
         Member foundMember = memberRepository.findMemberByEmail(email);
 
         return foundMember.getUserId();
     }
+    public String getMemberEmailfromUserId(String userId){
+        Member foundMember = memberRepository.findMemberByuserId(userId);
+
+        return foundMember.getEmail();
+    }
+
 }

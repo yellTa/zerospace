@@ -12,17 +12,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORSFilter implements Filter {
 
     private static final List<String> allowedOrigins = Arrays.asList(
             //여기에 버셀주소 적으면 되는거임
             "https://localhost:3000",
             "http://localhost:3000",
-            "https://zero-space-service.vercel.app/",
-            " https://zero-space-service-fkbbrm78r-p-inns-projects.vercel.app/"
+            "https://zero-space-service.vercel.app",
+            "https://zero-space-service-snowy.vercel.app"
     );
 
     @Override
@@ -38,6 +36,7 @@ public class CORSFilter implements Filter {
         String requestURI = request.getRequestURI();
 
         if (requestURI.startsWith("/oauth2/authorization/kakao") || requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("/error")) {
+            log.info("==========CORS SKIP================");
             chain.doFilter(req, res); // 필터를 넘기고 바로 리턴
             return;
         }
@@ -47,7 +46,7 @@ public class CORSFilter implements Filter {
         log.info("User-Agent : {}", userAgent);
 
         String origin = request.getHeader("Origin");
-
+        log.info("================add CORS Header==================");
         if (allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         }
@@ -61,7 +60,7 @@ public class CORSFilter implements Filter {
             log.info("CORS END ==================================");
             return;
         }
-
+        log.info("CORS dp filter END=======================================");
         chain.doFilter(req, res);
     }
 

@@ -15,16 +15,15 @@ import java.io.IOException;
 
 import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
 
-@Component
+
 @RequiredArgsConstructor
 @Slf4j
-@Order(1)
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JWTTokenService jwtTokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("OAuth filter start ===============================");
+        log.info("===============JWT filter start ===============================");
         String accessToken = "";
         String refreshToken = "";
 
@@ -35,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (requestURI.startsWith("/login/oauth2/code/kakao") ||
                 requestURI.startsWith("/loginResult") ||
                 requestURI.startsWith("/oauth2/authorization/kakao") ||
-                requestURI.startsWith("calendar") || requestURI.startsWith("error")) {
+                requestURI.startsWith("/error")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
             log.info("JWT Token skip URI = {}", requestURI);
             filterChain.doFilter(request, response);
