@@ -31,6 +31,7 @@ public class Config {
     public SecurityFilterChain OAuthAndJWTValidationFilter(HttpSecurity httpSecurity, OAuthSuccessHandler successHandler) throws Exception {
 
         httpSecurity
+                .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
                         // 로그인 없이 접근 가능한 URI 설정
                         .requestMatchers("/calendar/data", "/resources/**", "/static/**", "/loginResult", "/login", "/").permitAll()

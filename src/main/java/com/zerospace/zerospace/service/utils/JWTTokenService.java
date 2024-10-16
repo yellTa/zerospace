@@ -27,7 +27,6 @@ public class JWTTokenService {
         Instant now = Instant.now();
         log.info("key value={}",SECRET_KEY);
 
-
         String accessToken = Jwts.builder()
                 .setSubject(userId)
                 .setIssuer("zerospace")

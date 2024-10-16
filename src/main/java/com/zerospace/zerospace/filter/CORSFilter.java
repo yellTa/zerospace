@@ -35,11 +35,12 @@ public class CORSFilter implements Filter {
 
         String requestURI = request.getRequestURI();
 
-        if (requestURI.startsWith("/oauth2/authorization/kakao") || requestURI.startsWith("/login/oauth2/code/kakao") || requestURI.startsWith("/error")) {
+        if (requestURI.startsWith("/oauth2/authorization/kakao") || requestURI.startsWith("/login/oauth2/code/kakao")) {
             log.info("==========CORS SKIP================");
             chain.doFilter(req, res); // 필터를 넘기고 바로 리턴
             return;
         }
+
         log.info("CORS fILTER START =============================================");
         log.info(request.getRequestURI());
         String userAgent = request.getHeader("User-Agent");
@@ -54,13 +55,14 @@ public class CORSFilter implements Filter {
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me, Authorization, cache-control");
         response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Expose-Headers", "Authorization, refreshToken");
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
-            log.info("CORS END ==================================");
+            log.info("OPTIONS CORS IGNORE CASE END ==================================");
             return;
         }
-        log.info("CORS dp filter END=======================================");
+        log.info("CORS filter END=======================================");
         chain.doFilter(req, res);
     }
 
