@@ -44,6 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             accessToken = jwtTokenService.getAccessToken(request);
             refreshToken = jwtTokenService.getRefreshToken(request);
+            log.info("userId = {}", jwtTokenService.getUserIdFromToken(accessToken));
         } catch (Exception e) {
             response.getWriter().write("Invalid access");
             log.info(e.toString());
