@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -159,4 +160,33 @@ public class CalendarServiceImpl {
             }
         }
     }
+
+    @Transactional
+    public ResponseEntity<?> getCalendarInfoByMonth(HttpServletRequest request, int month, int year) {
+        String accessToken = jwtTokenService.getAccessToken(request);
+        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+
+        // 월별 조회를 위한 날짜 범위 계산
+        LocalDate startDate = LocalDate.of(year, month, 1); // 해당 월의 첫 날
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth()); // 해당 월의 마지막 날
+
+        // 해당 기간 내의 데이터 조회
+        List<CalendarInfo> calendarInfos = calendarInfoRepository
+                .findAllByUserIdAndStartTimeBetween(userId, startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+
+        if (calendarInfos.isEmpty()) {
+            return new ResponseEntity<>("조회된 데이터가 없습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", userId);
+        response.put("month", month);
+        response.put("year", year);
+        response.put("data", calendarInfos);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }
+

@@ -39,4 +39,15 @@ public class CalendarController {
         log.info("return result = {}", calendarInfo.getBody());
         return calendarInfo;
     }
+
+    @PostMapping("/month")
+    public ResponseEntity<?> getCalendarByMonth(HttpServletRequest request,
+                                                @RequestBody Map<String, Integer> requestBody) {
+        int month = requestBody.get("month");
+        int year = requestBody.get("year");
+
+        // CalendarService에서 월별 데이터를 조회하고 반환
+        ResponseEntity<?> response = calendarService.getCalendarInfoByMonth(request, month, year);
+        return response;
+    }
 }
