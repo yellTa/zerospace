@@ -67,13 +67,13 @@ public class CrawlingLogic {
         return driver;
     }
 
-    public ArrayList<CalendarInfo> crawlingLogic(String platform, WebDriver driver) {
+    public ArrayList<CalendarInfo> crawlingLogic(String platform, String userId,WebDriver driver) {
         ArrayList<CalendarInfo> result = new ArrayList<>();
         if (platform.equals("hourplace")) {
-            result = hourplaceCrawling.hourspaceGetInfo(driver);
+            result = hourplaceCrawling.hourspaceGetInfo(driver, userId);
 
         } else if (platform.equals("spacecloud")) {
-            result = spacecloudCrawling.spacecloudGetInfo(driver);
+            result = spacecloudCrawling.spacecloudGetInfo(driver,userId);
         }
 
         return result;

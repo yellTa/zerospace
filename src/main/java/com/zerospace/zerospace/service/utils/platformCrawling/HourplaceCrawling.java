@@ -5,12 +5,11 @@ import com.zerospace.zerospace.exception.CrawlingException;
 import com.zerospace.zerospace.exception.LoginFailedException;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -20,6 +19,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,6 +59,20 @@ public class HourplaceCrawling {
             enterLoginBtn.click();
 
             Thread.sleep(500);
+
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+
+            try {
+
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+                WebElement nextReview = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"feedback_vue\"]/div/div/div[5]/div[4]/p")));
+                    nextReview.click();
+            } catch (TimeoutException e) {
+                log.info("get into list Page");
+            }finally{
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(120));
+            }
+
             WebElement check = driver.findElement(By.xpath("//*[@id=\"login_vue\"]/div/div[3]/div[3]/p"));
             String checkMessage = check.getText();
 
@@ -74,7 +88,7 @@ public class HourplaceCrawling {
         }
     }
 
-    public ArrayList<CalendarInfo> hourspaceGetInfo(WebDriver driver) {
+    public ArrayList<CalendarInfo> hourspaceGetInfo(WebDriver driver, String userId) {
         ArrayList<CalendarInfo> result = new ArrayList<>();
 
         try {
@@ -95,6 +109,8 @@ public class HourplaceCrawling {
                 log.info("---------------------");
                 CalendarInfo calendarInfo = new CalendarInfo();
                 calendarInfo.setPlatform("hourplace");
+                calendarInfo.setUserId(userId);
+
                 WebElement div = list.get(i);
 
                 //시간

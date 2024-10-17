@@ -19,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.zerospace.zerospace.Const.Const.*;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -58,13 +57,13 @@ public class LoginController {
         return map;
     }
 
+    //Test후 삭제 예정
     @GetMapping("/apiTest")
     public String apiTest(HttpServletRequest request, HttpServletResponse response){
         String userId = request.getHeader(ACCESS_TOKEN_NAME);
         String email = memberService.getMemberEmailfromUserId(userId);
         return email;
     }
-
     @GetMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken")
@@ -82,5 +81,4 @@ public class LoginController {
                 .header("Location", "돌아갈 UI적기?")
                 .build();
     }
-
 }

@@ -48,13 +48,12 @@ class CrawlingLogicTest {
     @DisplayName("calendser Servle Impl의 crawling 로직 수행")
     public void connectionTest() {
         MockHttpServletRequest request = new MockHttpServletRequest();
+
         try {
             ResponseEntity<?> calendarInfo = calendarServiceImpl.getCalendarInfo(request);
-            log.info(calendarInfo.getStatusCode().toString());
+            log.info( calendarInfo.getBody().toString());
         } catch (Exception e) {
-
+            log.info(e.toString());
         }
-
     }
-
 }

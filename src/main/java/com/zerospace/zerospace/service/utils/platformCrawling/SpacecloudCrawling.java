@@ -93,7 +93,7 @@ public class SpacecloudCrawling {
 
     }
 
-    public ArrayList<CalendarInfo> spacecloudGetInfo(WebDriver driver) {
+    public ArrayList<CalendarInfo> spacecloudGetInfo(WebDriver driver, String userId) {
         ArrayList<CalendarInfo> result = new ArrayList<>();
 
         try {
@@ -108,6 +108,7 @@ public class SpacecloudCrawling {
 
                 CalendarInfo calendarInfo = new CalendarInfo();
                 calendarInfo.setPlatform("spacecloud");
+                calendarInfo.setUserId(userId);
 
                 WebElement location = div.findElement(By.cssSelector("dd.place"));
                 log.info("location  = {}", location.getText());

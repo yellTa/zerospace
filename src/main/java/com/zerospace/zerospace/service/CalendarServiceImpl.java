@@ -1,5 +1,6 @@
 package com.zerospace.zerospace.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerospace.zerospace.domain.CalendarInfo;
 import com.zerospace.zerospace.domain.HourplaceAccount;
 import com.zerospace.zerospace.domain.SpacecloudAccount;
@@ -8,6 +9,7 @@ import com.zerospace.zerospace.exception.LoginFailedException;
 import com.zerospace.zerospace.repository.CalendarInfoRepository;
 import com.zerospace.zerospace.repository.HourplaceAccountRepository;
 import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
+import com.zerospace.zerospace.service.utils.ClickRateCount;
 import com.zerospace.zerospace.service.utils.CrawlingLogic;
 import com.zerospace.zerospace.service.utils.JWTTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +35,13 @@ public class CalendarServiceImpl {
     private final SpacecloudAccountRepository spacecloudAccountRepository;
     private final CrawlingLogic crawlingLogic;
     private final CalendarInfoRepository calendarInfoRepository;
+    private final ClickRateCount clickRateCount;
 
     @Transactional
     public void saveHourplaceAccount(String platform, String email, String password, HttpServletRequest request) {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+//        String accessToken = jwtTokenService.getAccessToken(request);
+//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+        String userId = "testId"; //test용 계정
 
         if (platform.contains("hourplace")) {
             HourplaceAccount hourplaceAccount = hourplaceAccountRepository.findByUserId(userId);
@@ -56,15 +63,14 @@ public class CalendarServiceImpl {
                 spacecloudAccountRepository.save(spacecloudAccount);
             }
         }
-
-
     }
 
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
-//        String accessToken = jwtTokenService.getAccessToken(request);
-//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
-        String userId = "testId";
+        String accessToken = jwtTokenService.getAccessToken(request);
+        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+//        String userId = "testId";
+
         WebDriver driver = null;
         try {
             driver = crawlingLogic.loginCheck("hourplace", userId);
@@ -80,13 +86,13 @@ public class CalendarServiceImpl {
 
         ArrayList<CalendarInfo> hourplaceInfo = new ArrayList<>();
         try {
-            hourplaceInfo = crawlingLogic.crawlingLogic("hourplace", driver);
+            hourplaceInfo = crawlingLogic.crawlingLogic("hourplace",userId, driver);
         } catch (CrawlingException e) {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-
         driver = null;
+
         try {
             driver = crawlingLogic.loginCheck("spacecloud", userId);
             if (driver == null) {
@@ -101,7 +107,7 @@ public class CalendarServiceImpl {
         ArrayList<CalendarInfo> spacecloud = new ArrayList<>();
 
         try {
-            spacecloud = crawlingLogic.crawlingLogic("spacecloud", driver);
+            spacecloud = crawlingLogic.crawlingLogic("spacecloud",userId,driver);
         } catch (CrawlingException e) {
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -117,14 +123,15 @@ public class CalendarServiceImpl {
             log.info(e.toString());
             new ResponseEntity<>("오류가 발생했습니다!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-
         //날짜별 클릭수 저장하기
+        clickRateCount.clickRateCount(userId, LocalDate.now());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contents", crawlingResult);
+
+
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository
-
-
-
-        return new ResponseEntity<>("success", HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public void calendarConnectionSave(ArrayList<CalendarInfo> crawlingData) throws Exception {

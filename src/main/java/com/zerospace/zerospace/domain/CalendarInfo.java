@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +17,7 @@ public class CalendarInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long indexNum;
 
+    private String userId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String price;
@@ -27,5 +27,4 @@ public class CalendarInfo {
     private String customer;
     private String reservationNumber;
     private String link;
-
 }
