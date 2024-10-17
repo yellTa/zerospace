@@ -1,57 +1,71 @@
 package com.zerospace.zerospace.web;
 
-import com.zerospace.zerospace.service.JWTTokenService;
+import com.zerospace.zerospace.service.MemberServiceImpl;
+import com.zerospace.zerospace.service.utils.JWTTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-@Controller
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static com.zerospace.zerospace.Const.Const.*;
+@RestController
 @RequiredArgsConstructor
+@Slf4j
 public class LoginController {
     private final OAuth2AuthorizedClientService authorizedClientService;
-
     private final JWTTokenService jwtTokenService;
+    private final MemberServiceImpl memberService;
 
-    @GetMapping("/logout")
-    public ResponseEntity<String> logout(HttpSession session, OAuth2AuthenticationToken authentication, HttpServletResponse response) {
-        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
-                authentication.getAuthorizedClientRegistrationId(),
-                authentication.getName()
-        );
+    @PostMapping("/loginResult")
+    public Map<String,String> oauth2Redirect(HttpServletResponse response, @RequestBody Map<String,String> bodyUserId){
+        String userId = bodyUserId.get("userId");
 
-        if (authentication != null) {
-            String kakaoToken = authorizedClient.getAccessToken().getTokenValue();
-            try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + kakaoToken);
+        log.info("created AccessToken and Refresh Token");
 
-                HttpEntity<Void> request = new HttpEntity<>(headers);
-                RestTemplate restTemplate = new RestTemplate();
-                String kakaoLogoutUrl = "https://kapi.kakao.com/v1/user/logout";
+        String accessToken = jwtTokenService.createAcecssToken(userId);
+        String refreshToken = jwtTokenService.createRefreshToken(userId);
+        String memberEmail = memberService.getMemberEmailfromUserId(userId);
 
-                ResponseEntity<String> responseEntity = restTemplate.postForEntity(kakaoLogoutUrl, request, String.class);
+        response.setHeader(ACCESS_TOKEN_NAME, "Bearer " + accessToken);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_NAME, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(REFRESH_TOKEN_VALIDITY_SECONDS)
+                .sameSite("none")
+                .build();
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-                    return responseEntity;
-                }
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-            } catch (HttpClientErrorException e) {
-                e.printStackTrace();
-            }
-        }
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("email", memberEmail);
+        map.put("AccessToken", accessToken);
 
-        session.invalidate();
-        SecurityContextHolder.clearContext();
+        return map;
+    }
 
+    //Test후 삭제 예정
+    @GetMapping("/apiTest")
+    public String apiTest(HttpServletRequest request, HttpServletResponse response){
+        String userId = request.getHeader(ACCESS_TOKEN_NAME);
+        String email = memberService.getMemberEmailfromUserId(userId);
+        return email;
+    }
+    @GetMapping("/logoutzero")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken")
                 .path("/")
                 .sameSite("None")
@@ -61,8 +75,10 @@ public class LoginController {
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         response.setHeader("Authorization", "");
+
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:8080/")
+                //돌아갈 UI지정해놓기
+                .header("Location", "돌아갈 UI적기?")
                 .build();
     }
 }

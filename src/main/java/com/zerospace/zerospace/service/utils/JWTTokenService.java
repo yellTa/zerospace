@@ -1,4 +1,4 @@
-package com.zerospace.zerospace.service;
+package com.zerospace.zerospace.service.utils;
 
 
 import io.jsonwebtoken.Claims;
@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +20,13 @@ import static com.zerospace.zerospace.Const.Const.*;
 
 
 @Component
+@Slf4j
 public class JWTTokenService {
 
     public String createAcecssToken(String userId) {
         Instant now = Instant.now();
+        log.info("key value={}",SECRET_KEY);
+
         String accessToken = Jwts.builder()
                 .setSubject(userId)
                 .setIssuer("zerospace")
@@ -49,7 +53,17 @@ public class JWTTokenService {
 
     public String getAccessToken(HttpServletRequest request) {
         String token = request.getHeader(ACCESS_TOKEN_NAME);
-        if (token == null) return "";
+
+        if (token == null || token.isEmpty()) {
+            log.warn("Access token is missing");
+            return "";
+        }
+
+        if (token.length() < 7 || !token.startsWith("Bearer ")) {
+            log.warn("Invalid access token format");
+            return "";
+        }
+
         return token.substring(7);
     }
 
@@ -109,7 +123,6 @@ public class JWTTokenService {
                 .maxAge(0)  // 쿠키 만료 시간을 0으로 설정하여 삭제
                 .sameSite("None")
                 .build();
-
         return refreshTokenCookie;
     }
 

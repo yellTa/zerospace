@@ -1,7 +1,6 @@
 package com.zerospace.zerospace.filter;
 
-import com.zerospace.zerospace.service.JWTTokenService;
-import com.zerospace.zerospace.service.MemberService;
+import com.zerospace.zerospace.service.utils.JWTTokenService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,29 +15,40 @@ import java.io.IOException;
 
 import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
 
-@Component
+
 @RequiredArgsConstructor
 @Slf4j
-@Order(1)
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JWTTokenService jwtTokenService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String refreshToken = jwtTokenService.getRefreshToken(request);
+        log.info("===============JWT filter start ===============================");
+        String accessToken = "";
+        String refreshToken = "";
 
         // 요청 URI 가져오기
         String requestURI = request.getRequestURI();
-
-        log.info(requestURI);
+        log.info("JWT requestURI = {}", requestURI);
         // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
-        if (requestURI.contains("/login/oauth2/code/kakao") || requestURI.contains("apiTest2")) {
-            log.info(requestURI);
+        if (requestURI.startsWith("/login/oauth2/code/kakao") ||
+                requestURI.startsWith("/loginResult") ||
+                requestURI.startsWith("/oauth2/authorization/kakao") ||
+                requestURI.startsWith("/error") ||
+                requestURI.startsWith("/logoutzero")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
-            log.info(requestURI);
+            log.info("JWT Token skip URI = {}", requestURI);
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            accessToken = jwtTokenService.getAccessToken(request);
+            refreshToken = jwtTokenService.getRefreshToken(request);
+            log.info("userId = {}", jwtTokenService.getUserIdFromToken(accessToken));
+        } catch (Exception e) {
+            response.getWriter().write("Invalid access");
+            log.info(e.toString());
             return;
         }
 
@@ -57,7 +67,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         String userId = jwtTokenService.getUserIdFromToken(accessToken);
                         String createdAccessToken = jwtTokenService.createAcecssToken(userId);
                         response.setHeader(ACCESS_TOKEN_NAME, createdAccessToken);
-
                     } else {
                         //유효하지 않은경우
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -68,18 +77,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                 }
                 filterChain.doFilter(request, response);
+
             } else {//AccessToken이 없는 경우
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
                 response.addHeader("Set-Cookie", responseCookie.toString());
                 response.getWriter().write("No accessToken");
             }
-
         } catch (Exception e) {
             log.info(e.toString());
         }
-
-
     }
-
 }

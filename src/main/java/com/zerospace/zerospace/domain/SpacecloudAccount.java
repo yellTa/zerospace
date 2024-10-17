@@ -6,16 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class SpacecloudAccount {
     @Id
     private String userId;
-
-    private String email;
-
-    private String nickName;
-
+    private String spacecloudEmail;
+    private String spacecloudPassword;
 }

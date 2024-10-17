@@ -10,12 +10,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class HourplaceAccount {
     @Id
     private String userId;
+    private String hourplaceEmail;
+    private String hourplacePassword;
 
-    private String email;
-
-    private String nickName;
 
 }
