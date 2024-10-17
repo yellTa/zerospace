@@ -64,7 +64,7 @@ public class LoginController {
         String email = memberService.getMemberEmailfromUserId(userId);
         return email;
     }
-    @GetMapping("/logout")
+    @GetMapping("/logoutzero")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken")
                 .path("/")

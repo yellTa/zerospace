@@ -34,7 +34,7 @@ public class Config {
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
                         // 로그인 없이 접근 가능한 URI 설정
-                        .requestMatchers("/calendar/data", "/resources/**", "/static/**", "/loginResult", "/login", "/").permitAll()
+                        .requestMatchers("/calendar/data", "/resources/**", "/static/**", "/loginResult", "/login", "/","/logout").permitAll()
                         // 그 외의 요청은 인증이 필요
                         .anyRequest().authenticated()
                 )

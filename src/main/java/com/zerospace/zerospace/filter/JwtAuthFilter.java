@@ -34,7 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (requestURI.startsWith("/login/oauth2/code/kakao") ||
                 requestURI.startsWith("/loginResult") ||
                 requestURI.startsWith("/oauth2/authorization/kakao") ||
-                requestURI.startsWith("/error")) {
+                requestURI.startsWith("/error") ||
+                requestURI.startsWith("/logoutzero")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
             log.info("JWT Token skip URI = {}", requestURI);
             filterChain.doFilter(request, response);
@@ -76,6 +77,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                 }
                 filterChain.doFilter(request, response);
+
             } else {//AccessToken이 없는 경우
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
