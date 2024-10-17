@@ -19,7 +19,7 @@ public class Const {
     public static String REFRESH_TOKEN_NAME = "refreshToken";
 
 
-
+    public static Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
 
 

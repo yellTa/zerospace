@@ -45,9 +45,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             accessToken = jwtTokenService.getAccessToken(request);
+            log.info("accessToken={}", accessToken);
             refreshToken = jwtTokenService.getRefreshToken(request);
+            log.info("refreshToken={}", refreshToken);
             log.info("userId = {}", jwtTokenService.getUserIdFromToken(accessToken));
         } catch (Exception e) {
+            response.setStatus(500);
             response.getWriter().write("Invalid access");
             log.info(e.toString());
             return;
@@ -59,6 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
                     response.addHeader("Set-Cookie", responseCookie.toString());
+                    response.setStatus(500);
                     response.getWriter().write("Invalid accessToken");
                     return;
                 }
@@ -73,6 +77,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
                         response.addHeader("Set-Cookie", responseCookie.toString());
+                        response.setStatus(500);
                         response.getWriter().write("Invalid refreshToken");
                         return;
                     }
@@ -83,6 +88,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
                 response.addHeader("Set-Cookie", responseCookie.toString());
+                response.setStatus(500);
                 response.getWriter().write("No accessToken");
             }
         } catch (Exception e) {

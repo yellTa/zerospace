@@ -1,5 +1,10 @@
 package com.zerospace.zerospace.web;
 
+import com.zerospace.zerospace.domain.HourplaceAccount;
+import com.zerospace.zerospace.domain.SpacecloudAccount;
+import com.zerospace.zerospace.repository.HourplaceAccountRepository;
+import com.zerospace.zerospace.repository.MemberRepository;
+import com.zerospace.zerospace.repository.SpacecloudAccountRepository;
 import com.zerospace.zerospace.service.MemberServiceImpl;
 import com.zerospace.zerospace.service.utils.JWTTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.zerospace.zerospace.Const.Const.*;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -26,9 +32,12 @@ public class LoginController {
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final JWTTokenService jwtTokenService;
     private final MemberServiceImpl memberService;
+    private final HourplaceAccountRepository hourplaceAccountRepository;
+    private final MemberRepository memberRepository;
+    private final SpacecloudAccountRepository spacecloudAccountRepository;
 
     @PostMapping("/loginResult")
-    public Map<String,String> oauth2Redirect(HttpServletResponse response, @RequestBody Map<String,String> bodyUserId){
+    public Map<String, String> oauth2Redirect(HttpServletResponse response, @RequestBody Map<String, String> bodyUserId) {
         String userId = bodyUserId.get("userId");
 
         log.info("created AccessToken and Refresh Token");
@@ -54,16 +63,37 @@ public class LoginController {
         map.put("email", memberEmail);
         map.put("AccessToken", accessToken);
 
+        try {
+            //hourplaceEmail
+            //hourplacePassword
+            HourplaceAccount hourplaceUser = hourplaceAccountRepository.findByUserId(userId);
+            map.put("hourplaceEmail", hourplaceUser.getHourplaceEmail());
+            map.put("hourplacePassword", hourplaceUser.getHourplacePassword());
+        } catch (NullPointerException e) {
+            map.put("hourplaceEmail", "");
+            map.put("hourplacePassword", "");
+        }
+        try {
+            //spacecloudEmail
+            //spacecloudPassword
+            SpacecloudAccount spacecloudUser = spacecloudAccountRepository.findByUserId(userId);
+            map.put("spacecloudEmail", spacecloudUser.getSpacecloudEmail());
+            map.put("spacecloudPassword", spacecloudUser.getSpacecloudPassword());
+        } catch (NullPointerException e) {
+            map.put("spacecloudEmail", "");
+            map.put("spacecloudPassword", "");
+        }
         return map;
     }
 
     //Test후 삭제 예정
     @GetMapping("/apiTest")
-    public String apiTest(HttpServletRequest request, HttpServletResponse response){
+    public String apiTest(HttpServletRequest request, HttpServletResponse response) {
         String userId = request.getHeader(ACCESS_TOKEN_NAME);
         String email = memberService.getMemberEmailfromUserId(userId);
         return email;
     }
+
     @GetMapping("/logoutzero")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken")
@@ -76,6 +106,6 @@ public class LoginController {
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         response.setHeader("Authorization", "");
 
-        return new ResponseEntity("success",HttpStatus.OK);
+        return new ResponseEntity("success", HttpStatus.OK);
     }
 }

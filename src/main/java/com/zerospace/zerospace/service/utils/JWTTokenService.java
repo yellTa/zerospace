@@ -32,7 +32,7 @@ public class JWTTokenService {
                 .setIssuer("zerospace")
                 .setIssuedAt(Date.from(now))
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS256, KEY)
                 .compact();
 
         return accessToken;
@@ -45,7 +45,7 @@ public class JWTTokenService {
                 .setIssuer("zerospace")
                 .setIssuedAt(Date.from(now))
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY_SECONDS))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS256, KEY)
                 .compact();
 
         return refreshToken;
@@ -82,7 +82,7 @@ public class JWTTokenService {
     public boolean isTokenValidate(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(KEY)
                     .parseClaimsJwt(token)
                     .getBody();
             return true;
@@ -108,7 +108,7 @@ public class JWTTokenService {
 
     public String getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(KEY)
                 .parseClaimsJws(token)
                 .getBody();
 

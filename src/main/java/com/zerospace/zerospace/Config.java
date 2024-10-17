@@ -4,7 +4,9 @@ package com.zerospace.zerospace;
 import com.zerospace.zerospace.filter.CORSFilter;
 import com.zerospace.zerospace.filter.JwtAuthFilter;
 import com.zerospace.zerospace.handler.OAuthSuccessHandler;
+import com.zerospace.zerospace.repository.MemberRepository;
 import com.zerospace.zerospace.service.utils.JWTTokenService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @Slf4j
 public class Config {
-
 
     @Autowired
     private final JWTTokenService jwtTokenService;
