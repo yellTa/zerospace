@@ -34,10 +34,7 @@ public class Config {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
-                        // 로그인 없이 접근 가능한 URI 설정
-                        .requestMatchers( "/resources/**", "/static/**", "/loginResult", "/login", "/","/logout","/data").permitAll()
-                        // 그 외의 요청은 인증이 필요
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // 모든 경로를 허용
                 )
                 .addFilterBefore(new CORSFilter(), OAuth2LoginAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthFilter(jwtTokenService), OAuth2LoginAuthenticationFilter.class)

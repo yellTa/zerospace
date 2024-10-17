@@ -25,7 +25,7 @@ public class JWTTokenService {
 
     public String createAcecssToken(String userId) {
         Instant now = Instant.now();
-        log.info("key value={}",SECRET_KEY);
+        log.info("key value={}", SECRET_KEY);
 
         String accessToken = Jwts.builder()
                 .setSubject(userId)
@@ -81,34 +81,46 @@ public class JWTTokenService {
 
     public boolean isTokenValidate(String token) {
         try {
-            Claims claims = Jwts.parser()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(KEY)
-                    .parseClaimsJwt(token)
+                    .build()
+                    .parseClaimsJws(token)  // 서명된 JWT를 파싱하기 위해 parseClaimsJws() 사용
                     .getBody();
             return true;
         } catch (SignatureException e) {
+            log.warn("Invalid token signature", e);
+            return false;
+        } catch (ExpiredJwtException e) {
+            log.warn("Token expired", e);
+            return false;
+        } catch (Exception e) {
+            log.warn("Token validation failed", e);
             return false;
         }
     }
 
     public boolean isTokenExpired(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .parseClaimsJwt(token)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)  // 서명된 JWT를 파싱하기 위해 parseClaimsJws() 사용
                     .getBody();
 
             Date expiration = claims.getExpiration();
-
-            //만료되면 true
-            return expiration.before(new Date());
+            return expiration.before(new Date());  // 만료되었으면 true 반환
         } catch (ExpiredJwtException e) {
-            return true;
+            return true;  // 만료된 경우 true 반환
+        } catch (Exception e) {
+            log.warn("Error occurred during token expiration check", e);
+            return true;  // 만료되었다고 간주
         }
     }
 
     public String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(KEY)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
 

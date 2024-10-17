@@ -59,6 +59,8 @@ public class LoginController {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        log.info("created AccessToken ={}", accessToken);
+        log.info("created RefreshToken={}", refreshToken);
         Map<String, String> map = new LinkedHashMap<>();
         map.put("email", memberEmail);
         map.put("AccessToken", accessToken);
