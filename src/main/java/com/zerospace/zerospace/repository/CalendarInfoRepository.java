@@ -10,4 +10,6 @@ import java.util.List;
 public interface CalendarInfoRepository extends JpaRepository<CalendarInfo, Integer> {
     public CalendarInfo findByReservationNumber(String number);
     List<CalendarInfo> findAllByUserIdAndStartTimeBetween(String userId, LocalDateTime startTime, LocalDateTime endTime);
+
+    void deleteAllByUserId(String userId);
 }
