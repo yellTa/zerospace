@@ -9,18 +9,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Controller
 @ResponseBody
 @Slf4j
 @RequiredArgsConstructor
 public class CalendarController {
     private final CalendarServiceImpl calendarService;
+
     @PostMapping("/platform")
     public ResponseEntity<?> saveplatformInfo(HttpServletRequest request,
-                                              @RequestParam String platform,
-                                              @RequestParam String password,
-                                              @RequestParam String email) {
+                                              @RequestBody Map<String, String> requestBody) {
         try {
+            String platform = requestBody.get("platform");
+            String email = requestBody.get("email");
+            String password = requestBody.get("password");
+
             calendarService.saveHourplaceAccount(platform, email, password, request);
         } catch (Exception e) {
             return new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);

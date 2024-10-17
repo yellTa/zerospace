@@ -28,13 +28,10 @@ public class CrawlingLogic {
     public WebDriver loginCheck(String platform, String userId) {
         String id = "";
         String password = "";
-
         WebDriver driver = null;
 
         if (platform.equals("hourplace")) {
             //id pw가져오기
-
-
             try {
                 id = hourplaceAccount.findByUserId(userId).getHourplaceEmail();
                 password = hourplaceAccount.findByUserId(userId).getHourplacePassword();
@@ -52,11 +49,7 @@ public class CrawlingLogic {
                 log.info(e.toString());
                 throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             }
-
-
         } else if (platform.equals("spacecloud")) {
-
-
             try {
                 id = spacecloudAccount.findByUserId(userId).getSpacecloudEmail();
                 password = spacecloudAccount.findByUserId(userId).getSpacecloudPassword();
