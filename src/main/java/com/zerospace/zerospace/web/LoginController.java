@@ -76,9 +76,6 @@ public class LoginController {
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         response.setHeader("Authorization", "");
 
-        return ResponseEntity.status(HttpStatus.FOUND)
-                //돌아갈 UI지정해놓기
-                .header("Location", "돌아갈 UI적기?")
-                .build();
+        return new ResponseEntity("success",HttpStatus.OK);
     }
 }

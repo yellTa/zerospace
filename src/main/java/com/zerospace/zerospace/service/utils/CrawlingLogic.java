@@ -33,15 +33,21 @@ public class CrawlingLogic {
 
         if (platform.equals("hourplace")) {
             //id pw가져오기
-            id = hourplaceAccount.findByUserId(userId).getHourplaceEmail();
-            password = hourplaceAccount.findByUserId(userId).getHourplacePassword();
+
 
             try {
+                id = hourplaceAccount.findByUserId(userId).getHourplaceEmail();
+                password = hourplaceAccount.findByUserId(userId).getHourplacePassword();
+
                 driver = hourplaceCrawling.hourplaceLogin(id, password);
                 if (driver == null) {
                     log.info("hourplace login failed!");
                     return driver;
                 }
+            } catch (NullPointerException e) {
+                log.info("DB에 저장된 데이터 없음");
+                return null;
+//                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             } catch (Exception e) {
                 log.info(e.toString());
                 throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
@@ -49,15 +55,20 @@ public class CrawlingLogic {
 
 
         } else if (platform.equals("spacecloud")) {
-            id = spacecloudAccount.findByUserId(userId).getSpacecloudEmail();
-            password = spacecloudAccount.findByUserId(userId).getSpacecloudPassword();
+
 
             try {
+                id = spacecloudAccount.findByUserId(userId).getSpacecloudEmail();
+                password = spacecloudAccount.findByUserId(userId).getSpacecloudPassword();
                 driver = spacecloudCrawling.spacecloudLogin(id, password);
                 if (driver == null) {
                     log.info("spacecloud login failed!");
                     return null;
                 }
+            } catch (NullPointerException e) {
+                log.info("DB에 저장된 데이터 없음");
+                return null;
+//                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             } catch (Exception e) {
                 log.info(e.toString());
                 throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
@@ -67,13 +78,13 @@ public class CrawlingLogic {
         return driver;
     }
 
-    public ArrayList<CalendarInfo> crawlingLogic(String platform, String userId,WebDriver driver) {
+    public ArrayList<CalendarInfo> crawlingLogic(String platform, String userId, WebDriver driver) {
         ArrayList<CalendarInfo> result = new ArrayList<>();
         if (platform.equals("hourplace")) {
             result = hourplaceCrawling.hourspaceGetInfo(driver, userId);
 
         } else if (platform.equals("spacecloud")) {
-            result = spacecloudCrawling.spacecloudGetInfo(driver,userId);
+            result = spacecloudCrawling.spacecloudGetInfo(driver, userId);
         }
 
         return result;

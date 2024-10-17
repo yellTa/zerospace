@@ -39,9 +39,9 @@ public class CalendarServiceImpl {
 
     @Transactional
     public void saveHourplaceAccount(String platform, String email, String password, HttpServletRequest request) {
-//        String accessToken = jwtTokenService.getAccessToken(request);
-//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
-        String userId = "testId"; //test용 계정
+        String accessToken = jwtTokenService.getAccessToken(request);
+        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+
 
         if (platform.contains("hourplace")) {
             HourplaceAccount hourplaceAccount = hourplaceAccountRepository.findByUserId(userId);
@@ -67,51 +67,50 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String userId = jwtTokenService.getUserIdFromToken(accessToken);
-
+//        String accessToken = jwtTokenService.getAccessToken(request);
+//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+        String userId = "testId"; //test용 계정
         WebDriver driver = null;
+
+        ArrayList<CalendarInfo> hourplaceInfo = new ArrayList<>();
+        ArrayList<CalendarInfo> spacecloud = new ArrayList<>();
+
         try {
+            boolean flag = true;
             driver = crawlingLogic.loginCheck("hourplace", userId);
             if (driver == null) {
                 log.info("hourplace 계정이 일치하지 않음");
-                return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+            }else{
+                try {
+                    hourplaceInfo = crawlingLogic.crawlingLogic("hourplace",userId, driver);
+                } catch (CrawlingException e) {
+                    return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }
         } catch (LoginFailedException e) {
             log.info("hourplace 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-
         }
-
-        ArrayList<CalendarInfo> hourplaceInfo = new ArrayList<>();
-        try {
-            hourplaceInfo = crawlingLogic.crawlingLogic("hourplace",userId, driver);
-        } catch (CrawlingException e) {
-            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
         driver = null;
 
         try {
             driver = crawlingLogic.loginCheck("spacecloud", userId);
             if (driver == null) {
                 log.info("spacecloud 계정이 일치하지 않음");
-                return new ResponseEntity<>("계정이 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+            }else{
+                try {
+                    spacecloud = crawlingLogic.crawlingLogic("spacecloud",userId,driver);
+                } catch (CrawlingException e) {
+                    return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }
         } catch (LoginFailedException e) {
             log.info("spacecloud 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        ArrayList<CalendarInfo> spacecloud = new ArrayList<>();
-
-        try {
-            spacecloud = crawlingLogic.crawlingLogic("spacecloud",userId,driver);
-        } catch (CrawlingException e) {
-            return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
         ArrayList<CalendarInfo> crawlingResult = new ArrayList<>();
+
         crawlingResult.addAll(hourplaceInfo);
         crawlingResult.addAll(spacecloud);
 
@@ -127,7 +126,6 @@ public class CalendarServiceImpl {
 
         Map<String, Object> response = new HashMap<>();
         response.put("contents", crawlingResult);
-
 
         //필요한 것- 저장할 Entity, 오늘의 날짜 정보, 저장할 Entity의 Repository
         return new ResponseEntity<>(response, HttpStatus.OK);

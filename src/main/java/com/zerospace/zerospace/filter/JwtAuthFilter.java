@@ -35,7 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/loginResult") ||
                 requestURI.startsWith("/oauth2/authorization/kakao") ||
                 requestURI.startsWith("/error") ||
-                requestURI.startsWith("/logoutzero")) {
+                requestURI.startsWith("/logoutzero") ||
+                requestURI.startsWith("/data")) {
             // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
             log.info("JWT Token skip URI = {}", requestURI);
             filterChain.doFilter(request, response);

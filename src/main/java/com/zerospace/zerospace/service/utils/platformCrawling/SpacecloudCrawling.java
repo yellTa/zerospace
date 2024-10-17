@@ -63,7 +63,6 @@ public class SpacecloudCrawling {
 
             //page 넘어갈때 까지 대기하기
             String currentUrl = driver.getCurrentUrl();
-
             try {
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
                 wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(currentUrl)));
