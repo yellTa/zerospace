@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Controller
 @ResponseBody
 @Slf4j
@@ -33,5 +35,16 @@ public class CalendarController {
         ResponseEntity<?> calendarInfo = calendarService.getCalendarInfo(request);
         log.info("return result = {}", calendarInfo.getBody());
         return calendarInfo;
+    }
+
+    @PostMapping("/month")
+    public ResponseEntity<?> getCalendarByMonth(HttpServletRequest request,
+                                                @RequestBody Map<String, Integer> requestBody) {
+        int month = requestBody.get("month");
+        int year = requestBody.get("year");
+
+        // CalendarService에서 월별 데이터를 조회하고 반환
+        ResponseEntity<?> response = calendarService.getCalendarInfoByMonth(request, month, year);
+        return response;
     }
 }
