@@ -69,7 +69,6 @@ public class CalendarServiceImpl {
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
         String accessToken = jwtTokenService.getAccessToken(request);
         String userId = jwtTokenService.getUserIdFromToken(accessToken);
-//        String userId = "testId";
 
         WebDriver driver = null;
         try {
