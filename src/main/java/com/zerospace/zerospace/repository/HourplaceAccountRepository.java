@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface HourplaceAccountRepository extends JpaRepository<HourplaceAccount, Integer> {
-
     HourplaceAccount findByUserId(String userId);
+
+    void deleteByUserId(String userId);
 }

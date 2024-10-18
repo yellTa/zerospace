@@ -1,6 +1,7 @@
 package com.zerospace.zerospace.web;
 
 import com.zerospace.zerospace.service.CalendarServiceImpl;
+import com.zerospace.zerospace.service.MemberServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CalendarController {
     private final CalendarServiceImpl calendarService;
-
+    private final MemberServiceImpl memberService;
     @PostMapping("/platform")
     public ResponseEntity<?> saveplatformInfo(HttpServletRequest request,
                                               @RequestBody Map<String, String> requestBody) {
@@ -49,5 +50,17 @@ public class CalendarController {
         // CalendarService에서 월별 데이터를 조회하고 반환
         ResponseEntity<?> response = calendarService.getCalendarInfoByMonth(request, month, year);
         return response;
+    }
+
+    @GetMapping("/memberleave")
+    public ResponseEntity<?> memberLeave(HttpServletRequest request) {
+        try {
+            // 회원 탈퇴 및 데이터 삭제 로직 호출
+            memberService.deleteUserData(request);
+            return ResponseEntity.ok("회원 탈퇴 및 데이터 삭제가 완료되었습니다.");
+        } catch (Exception e) {
+            log.error("회원 탈퇴 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.status(500).body("회원 탈퇴 처리 중 오류가 발생했습니다.");
+        }
     }
 }
