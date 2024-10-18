@@ -146,6 +146,7 @@ public class CalendarServiceImpl {
             if (foundCal == null) {
                 calendarInfoRepository.save(cal);
             } else {
+                foundCal.setUserId(cal.getUserId());
                 foundCal.setStartTime(cal.getStartTime());
                 foundCal.setEndTime(cal.getEndTime());
                 foundCal.setPrice(cal.getPrice());
@@ -173,9 +174,6 @@ public class CalendarServiceImpl {
         LocalDate startDate = LocalDate.of(year, month, 1); // 해당 월의 첫 날
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth()); // 해당 월의 마지막 날
 
-        log.info("startDate = {}", startDate);
-        log.info("endDate = {}", endDate);
-
         // 해당 기간 내의 데이터 조회
         List<CalendarInfo> calendarInfos = calendarInfoRepository
                 .findAllByUserIdAndStartTimeBetween(userId, startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
@@ -185,10 +183,7 @@ public class CalendarServiceImpl {
 //        }
 
         List<Map<String, Object>> contents = new ArrayList<>();
-
         for (CalendarInfo info : calendarInfos) {
-            log.info("info = {}", info.getIndexNum());
-
             Map<String, Object> content = new HashMap<>();
             content.put("date", info.getStartTime().toLocalDate().toString());
             content.put("startTime", info.getStartTime().toString());
