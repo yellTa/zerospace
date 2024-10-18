@@ -146,6 +146,7 @@ public class CalendarServiceImpl {
             if (foundCal == null) {
                 calendarInfoRepository.save(cal);
             } else {
+                foundCal.setUserId(cal.getUserId());
                 foundCal.setStartTime(cal.getStartTime());
                 foundCal.setEndTime(cal.getEndTime());
                 foundCal.setPrice(cal.getPrice());
@@ -172,9 +173,6 @@ public class CalendarServiceImpl {
         // 월별 조회를 위한 날짜 범위 계산
         LocalDate startDate = LocalDate.of(year, month, 1); // 해당 월의 첫 날
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth()); // 해당 월의 마지막 날
-
-        log.info("startDate = {}", startDate);
-        log.info("endDate = {}", endDate);
 
         // 해당 기간 내의 데이터 조회
         List<CalendarInfo> calendarInfos = calendarInfoRepository
