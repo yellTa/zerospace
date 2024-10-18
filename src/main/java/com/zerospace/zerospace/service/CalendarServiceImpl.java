@@ -82,6 +82,7 @@ public class CalendarServiceImpl {
                 log.info("hourplace 계정이 일치하지 않음");
             }else{
                 try {
+                    log.info("hourplace crawling start");
                     hourplaceInfo = crawlingLogic.crawlingLogic("hourplace",userId, driver);
                 } catch (CrawlingException e) {
                     return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,14 +92,17 @@ public class CalendarServiceImpl {
             log.info("hourplace 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         driver = null;
 
         try {
+            log.info("spacecloud logincheck start");
             driver = crawlingLogic.loginCheck("spacecloud", userId);
             if (driver == null) {
                 log.info("spacecloud 계정이 일치하지 않음");
             }else{
                 try {
+                    log.info("hourplace crawling start");
                     spacecloud = crawlingLogic.crawlingLogic("spacecloud",userId,driver);
                 } catch (CrawlingException e) {
                     return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);

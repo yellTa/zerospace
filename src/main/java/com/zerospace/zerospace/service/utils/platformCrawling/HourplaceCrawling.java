@@ -66,10 +66,10 @@ public class HourplaceCrawling {
 
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
                 WebElement nextReview = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"feedback_vue\"]/div/div/div[5]/div[4]/p")));
-                    nextReview.click();
+                nextReview.click();
             } catch (TimeoutException e) {
                 log.info("get into list Page");
-            }finally{
+            } finally {
                 driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(120));
             }
 
@@ -146,14 +146,12 @@ public class HourplaceCrawling {
 
                 result.add(calendarInfo);
             }
-            driver.close();
-            driver.quit();
 
         } catch (Exception e) {
             log.info(e.toString());
-            driver.close();
-            driver.quit();
             throw new CrawlingException("알 수 없는 에러가 발생했습니다. 다시 시도해주세요");
+        } finally {
+            driver.quit();
         }
         return result;
     }
