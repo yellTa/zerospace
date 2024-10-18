@@ -21,12 +21,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Slf4j
 public class Config {
 
-    @Autowired
-    private final JWTTokenService jwtTokenService;
-
-    public Config(JWTTokenService jwtTokenService) {
-        this.jwtTokenService = jwtTokenService;
-    }
+//    @Autowired
+//    private final JWTTokenService jwtTokenService;
+//
+//    public Config(JWTTokenService jwtTokenService) {
+//        this.jwtTokenService = jwtTokenService;
+//    }
 
     @Bean
     public SecurityFilterChain OAuthAndJWTValidationFilter(HttpSecurity httpSecurity, OAuthSuccessHandler successHandler) throws Exception {
@@ -37,7 +37,7 @@ public class Config {
                         .anyRequest().permitAll() // 모든 경로를 허용
                 )
                 .addFilterBefore(new CORSFilter(), OAuth2LoginAuthenticationFilter.class)
-                .addFilterBefore(new JwtAuthFilter(jwtTokenService), OAuth2LoginAuthenticationFilter.class)
+//                .addFilterBefore(new JwtAuthFilter(jwtTokenService), OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("https://zzerospace.store:8443/oauth2/authorization/kakao")
                         .successHandler(successHandler)

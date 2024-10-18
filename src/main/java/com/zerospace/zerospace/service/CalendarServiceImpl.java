@@ -163,12 +163,18 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfoByMonth(HttpServletRequest request, int month, int year) {
-        String accessToken = jwtTokenService.getAccessToken(request);
-        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+//        String accessToken = jwtTokenService.getAccessToken(request);
+//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+
+        String userId ="testId";
+
 
         // 월별 조회를 위한 날짜 범위 계산
         LocalDate startDate = LocalDate.of(year, month, 1); // 해당 월의 첫 날
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth()); // 해당 월의 마지막 날
+
+        log.info("startDate = {}", startDate);
+        log.info("endDate = {}", endDate);
 
         // 해당 기간 내의 데이터 조회
         List<CalendarInfo> calendarInfos = calendarInfoRepository
@@ -179,7 +185,10 @@ public class CalendarServiceImpl {
         }
 
         List<Map<String, Object>> contents = new ArrayList<>();
+
         for (CalendarInfo info : calendarInfos) {
+            log.info("info = {}", info.getIndexNum());
+
             Map<String, Object> content = new HashMap<>();
             content.put("date", info.getStartTime().toLocalDate().toString());
             content.put("startTime", info.getStartTime().getHour());
