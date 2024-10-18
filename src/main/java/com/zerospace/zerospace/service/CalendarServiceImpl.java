@@ -180,9 +180,9 @@ public class CalendarServiceImpl {
         List<CalendarInfo> calendarInfos = calendarInfoRepository
                 .findAllByUserIdAndStartTimeBetween(userId, startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
 
-        if (calendarInfos.isEmpty()) {
-            return new ResponseEntity<>("조회된 데이터가 없습니다.", HttpStatus.NOT_FOUND);
-        }
+//        if (calendarInfos.isEmpty()) {
+//            return new ResponseEntity<>("조회된 데이터가 없습니다.", HttpStatus.NOT_FOUND);
+//        }
 
         List<Map<String, Object>> contents = new ArrayList<>();
 
@@ -190,9 +190,9 @@ public class CalendarServiceImpl {
             log.info("info = {}", info.getIndexNum());
 
             Map<String, Object> content = new HashMap<>();
-            content.put("date", info.getStartTime().toLocalDate().toString());
-            content.put("startTime", info.getStartTime().getHour());
-            content.put("endTime", info.getEndTime().getHour());
+            content.put("userId", userId);
+            content.put("startTime", info.getStartTime().toString());
+            content.put("endTime", info.getEndTime().toString());
             content.put("price", info.getPrice()); // price가 String이라서 그대로 넣음. 필요시 타입 변환.
             content.put("location", info.getLocation());
             content.put("platform", info.getPlatform());
