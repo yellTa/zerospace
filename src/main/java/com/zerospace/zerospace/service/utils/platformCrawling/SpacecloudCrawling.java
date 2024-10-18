@@ -139,14 +139,11 @@ public class SpacecloudCrawling {
 
                 result.add(calendarInfo);
             }
-
-            driver.close();
-            driver.quit();
         } catch (Exception e) {
             log.info(e.toString());
-            driver.close();
-            driver.quit();
             throw new CrawlingException("알 수 없는 에러가 발생했습니다. 다시 시도해주세요");
+        }finally{
+            driver.quit();
         }
         return result;
     }
@@ -214,5 +211,4 @@ public class SpacecloudCrawling {
 
         return calendarInfo;
     }
-
 }
