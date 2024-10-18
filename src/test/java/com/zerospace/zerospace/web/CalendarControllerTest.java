@@ -46,7 +46,7 @@ class CalendarControllerTest {
     @DisplayName("month 조회 TEST")
     public void montSearch() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        ResponseEntity<?> calendarInfoByMonth = calendarService.getCalendarInfoByMonth(request, 9, 2024);
+        ResponseEntity<?> calendarInfoByMonth = calendarService.getCalendarInfoByMonth(request, 10, 2024);
         String jsonString = calendarInfoByMonth.getBody().toString();
 
         log.info(jsonString);
