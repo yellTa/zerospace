@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -145,6 +146,7 @@ public class CalendarServiceImpl {
             if (foundCal == null) {
                 calendarInfoRepository.save(cal);
             } else {
+                foundCal.setUserId(cal.getUserId());
                 foundCal.setStartTime(cal.getStartTime());
                 foundCal.setEndTime(cal.getEndTime());
                 foundCal.setPrice(cal.getPrice());
@@ -159,4 +161,51 @@ public class CalendarServiceImpl {
             }
         }
     }
+
+    @Transactional
+    public ResponseEntity<?> getCalendarInfoByMonth(HttpServletRequest request, int month, int year) {
+//        String accessToken = jwtTokenService.getAccessToken(request);
+//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+
+        String userId ="testId";
+
+
+        // 월별 조회를 위한 날짜 범위 계산
+        LocalDate startDate = LocalDate.of(year, month, 1); // 해당 월의 첫 날
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth()); // 해당 월의 마지막 날
+
+        // 해당 기간 내의 데이터 조회
+        List<CalendarInfo> calendarInfos = calendarInfoRepository
+                .findAllByUserIdAndStartTimeBetween(userId, startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+
+//        if (calendarInfos.isEmpty()) {
+//            return new ResponseEntity<>("조회된 데이터가 없습니다.", HttpStatus.NOT_FOUND);
+//        }
+
+        List<Map<String, Object>> contents = new ArrayList<>();
+
+        for (CalendarInfo info : calendarInfos) {
+            log.info("info = {}", info.getIndexNum());
+
+            Map<String, Object> content = new HashMap<>();
+            content.put("startTime", info.getStartTime().toString());
+            content.put("endTime", info.getEndTime().toString());
+            content.put("price", info.getPrice()); // price가 String이라서 그대로 넣음. 필요시 타입 변환.
+            content.put("location", info.getLocation());
+            content.put("platform", info.getPlatform());
+            content.put("process", info.getProcess());
+            content.put("customer", info.getCustomer());
+            content.put("link", info.getLink());
+            content.put("reservationNumber", info.getReservationNumber());
+            contents.add(content);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contents", contents);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }
+
