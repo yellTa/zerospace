@@ -178,11 +178,24 @@ public class CalendarServiceImpl {
             return new ResponseEntity<>("조회된 데이터가 없습니다.", HttpStatus.NOT_FOUND);
         }
 
+        List<Map<String, Object>> contents = new ArrayList<>();
+        for (CalendarInfo info : calendarInfos) {
+            Map<String, Object> content = new HashMap<>();
+            content.put("date", info.getStartTime().toLocalDate().toString());
+            content.put("startTime", info.getStartTime().getHour());
+            content.put("endTime", info.getEndTime().getHour());
+            content.put("price", info.getPrice()); // price가 String이라서 그대로 넣음. 필요시 타입 변환.
+            content.put("location", info.getLocation());
+            content.put("platform", info.getPlatform());
+            content.put("process", info.getProcess());
+            content.put("customer", info.getCustomer());
+            content.put("link", info.getLink());
+            content.put("reservationNumber", info.getReservationNumber());
+            contents.add(content);
+        }
+
         Map<String, Object> response = new HashMap<>();
-        response.put("userId", userId);
-        response.put("month", month);
-        response.put("year", year);
-        response.put("data", calendarInfos);
+        response.put("contents", contents);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
