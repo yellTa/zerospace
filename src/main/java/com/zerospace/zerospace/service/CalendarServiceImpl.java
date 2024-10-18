@@ -190,7 +190,6 @@ public class CalendarServiceImpl {
             log.info("info = {}", info.getIndexNum());
 
             Map<String, Object> content = new HashMap<>();
-            content.put("userId", userId);
             content.put("startTime", info.getStartTime().toString());
             content.put("endTime", info.getEndTime().toString());
             content.put("price", info.getPrice()); // price가 String이라서 그대로 넣음. 필요시 타입 변환.
