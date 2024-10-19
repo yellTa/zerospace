@@ -68,9 +68,9 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfo(HttpServletRequest request) {
-//        String accessToken = jwtTokenService.getAccessToken(request);
-//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
-        String userId = "testId"; //test용 계정
+        String accessToken = jwtTokenService.getAccessToken(request);
+        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+//        String userId = "testId"; //test용 계정
         WebDriver driver = null;
 
         ArrayList<CalendarInfo> hourplaceInfo = new ArrayList<>();
@@ -164,10 +164,10 @@ public class CalendarServiceImpl {
 
     @Transactional
     public ResponseEntity<?> getCalendarInfoByMonth(HttpServletRequest request, int month, int year) {
-//        String accessToken = jwtTokenService.getAccessToken(request);
-//        String userId = jwtTokenService.getUserIdFromToken(accessToken);
+        String accessToken = jwtTokenService.getAccessToken(request);
+        String userId = jwtTokenService.getUserIdFromToken(accessToken);
 
-        String userId ="testId";
+//        String userId ="testId";
 
 
         // 월별 조회를 위한 날짜 범위 계산
