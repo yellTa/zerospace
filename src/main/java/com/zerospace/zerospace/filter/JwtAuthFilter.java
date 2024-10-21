@@ -6,15 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 import static com.zerospace.zerospace.Const.Const.ACCESS_TOKEN_NAME;
-
 
 @RequiredArgsConstructor
 @Slf4j
@@ -23,76 +20,76 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("===============JWT filter start ===============================");
-        String accessToken = "";
-        String refreshToken = "";
-
-        // 요청 URI 가져오기
+        log.info("=============== JWT filter start ===============================");
         String requestURI = request.getRequestURI();
         log.info("JWT requestURI = {}", requestURI);
-        // 특정 URI (login/oauth2/code/kakao)는 필터 검사를 제외
-        if (requestURI.startsWith("/login/oauth2/code/kakao") ||
-                requestURI.startsWith("/loginResult") ||
-                requestURI.startsWith("/oauth2/authorization/kakao") ||
-                requestURI.startsWith("/error") ||
-                requestURI.startsWith("/logoutzero") ||
-                requestURI.startsWith("/data")) {
-            // 이 URI에 대해 필터를 건너뛰고 다음 필터로 넘어가기
+
+        // 특정 URI는 필터 검사를 제외
+        if (shouldSkipFilter(requestURI)) {
             log.info("JWT Token skip URI = {}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            accessToken = jwtTokenService.getAccessToken(request);
-            log.info("accessToken={}", accessToken);
-            refreshToken = jwtTokenService.getRefreshToken(request);
-            log.info("refreshToken={}", refreshToken);
-//            log.info("userId = {}", jwtTokenService.getUserIdFromToken(accessToken));
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.getWriter().write("Invalid access");
-            log.info(e.toString());
-            return;
-        }
+            String accessToken = jwtTokenService.getAccessToken(request);
+            String refreshToken = jwtTokenService.getRefreshToken(request);
 
-        try {
-            if (!accessToken.equals("")) {
-                if (!jwtTokenService.isTokenValidate(accessToken)) {//accesss토큰이 유효하지 않을때
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
-                    response.addHeader("Set-Cookie", responseCookie.toString());
-                    response.setStatus(500);
-                    response.getWriter().write("Invalid accessToken");
-                    return;
-                }
-
-                if (jwtTokenService.isTokenExpired(accessToken)) {//토큰이 만료된 경우
-                    if (refreshToken != null && jwtTokenService.isTokenValidate(refreshToken)) {//refreshtoken이 유요한경우
-                        String userId = jwtTokenService.getUserIdFromToken(accessToken);
-                        String createdAccessToken = jwtTokenService.createAcecssToken(userId);
-                        response.setHeader(ACCESS_TOKEN_NAME, createdAccessToken);
-                    } else {
-                        //유효하지 않은경우
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
-                        response.addHeader("Set-Cookie", responseCookie.toString());
-                        response.setStatus(500);
-                        response.getWriter().write("Invalid refreshToken");
-                        return;
-                    }
-                }
-                filterChain.doFilter(request, response);
-
-            } else {//AccessToken이 없는 경우
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
-                response.addHeader("Set-Cookie", responseCookie.toString());
-                response.setStatus(500);
-                response.getWriter().write("No accessToken");
+            if (accessToken == null || accessToken.isEmpty()) {
+                handleUnauthorized(response, "No accessToken");
+                return;
             }
+
+            if (!jwtTokenService.isTokenValidate(accessToken)) {
+                handleUnauthorized(response, "Invalid accessToken");
+                return;
+            }
+
+            if (jwtTokenService.isTokenExpired(accessToken)) {
+                handleExpiredAccessToken(response, refreshToken, accessToken);
+                return;
+            }
+
+            // 유효한 accessToken인 경우 다음 필터로 이동
+            filterChain.doFilter(request, response);
+
         } catch (Exception e) {
-            log.info(e.toString());
+            log.error("Error during JWT processing: {}", e.getMessage());
+            handleServerError(response, "Invalid access");
         }
+    }
+
+    private boolean shouldSkipFilter(String requestURI) {
+        return requestURI.startsWith("/login/oauth2/code/kakao") ||
+                requestURI.startsWith("/loginResult") ||
+                requestURI.startsWith("/oauth2/authorization/kakao") ||
+                requestURI.startsWith("/error") ||
+                requestURI.startsWith("/logoutzero") ||
+                requestURI.startsWith("/data");
+    }
+
+    private void handleExpiredAccessToken(HttpServletResponse response, String refreshToken, String accessToken) throws IOException {
+        if (refreshToken != null && jwtTokenService.isTokenValidate(refreshToken)) {
+            String userId = jwtTokenService.getUserIdFromToken(accessToken);
+            String newAccessToken = jwtTokenService.createAcecssToken(userId);
+            response.setHeader(ACCESS_TOKEN_NAME, newAccessToken);
+            log.info("New accessToken issued for userId: {}", userId);
+        } else {
+            handleUnauthorized(response, "Invalid refreshToken");
+        }
+    }
+
+    private void handleUnauthorized(HttpServletResponse response, String message) throws IOException {
+        log.info(message);
+        ResponseCookie responseCookie = jwtTokenService.deleteRefreshToken();
+        response.addHeader("Set-Cookie", responseCookie.toString());
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write(message);
+    }
+
+    private void handleServerError(HttpServletResponse response, String message) throws IOException {
+        log.error(message);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write(message);
     }
 }
