@@ -110,6 +110,7 @@ public class JWTTokenService {
             Date expiration = claims.getExpiration();
             return expiration.before(new Date());  // 만료되었으면 true 반환
         } catch (ExpiredJwtException e) {
+            log.info("return valeu ture ExpriedJwtException");
             return true;  // 만료된 경우 true 반환
         } catch (Exception e) {
             log.warn("Error occurred during token expiration check", e);
@@ -118,13 +119,21 @@ public class JWTTokenService {
     }
 
     public String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰의 클레임 정보 추출
+            log.info("Token is expired, but extracting claims.", e);
+            return e.getClaims().getSubject(); // 만료된 토큰의 클레임에서 subject(사용자 ID) 추출
+        } catch (Exception e) {
+            log.error("Error parsing token", e);
+            return null; // 토큰이 유효하지 않거나 파싱할 수 없는 경우 null 반환
+        }
     }
 
     public ResponseCookie deleteRefreshToken() {

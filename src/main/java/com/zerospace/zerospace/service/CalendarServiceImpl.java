@@ -140,7 +140,6 @@ public class CalendarServiceImpl {
 
         for (CalendarInfo cal : crawlingData) {
             String number = cal.getReservationNumber();
-            log.info(cal.toString() + " \n");
             CalendarInfo foundCal = calendarInfoRepository.findByReservationNumber(number);
 
             if (foundCal == null) {
@@ -185,7 +184,7 @@ public class CalendarServiceImpl {
         List<Map<String, Object>> contents = new ArrayList<>();
 
         for (CalendarInfo info : calendarInfos) {
-            log.info("info = {}", info.getIndexNum());
+//            log.info("info = {}", info.getIndexNum());
 
             Map<String, Object> content = new HashMap<>();
             content.put("startTime", info.getStartTime().toString());

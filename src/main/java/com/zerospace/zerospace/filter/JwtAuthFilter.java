@@ -40,11 +40,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (!jwtTokenService.isTokenValidate(accessToken)) {
-                handleUnauthorized(response, "Invalid accessToken");
-                return;
-            }
-
+//            if (!jwtTokenService.isTokenValidate(accessToken)) {
+//                handleUnauthorized(response, "Invalid accessToken");
+//                return;
+//            }
+            log.info("jwtTokenSErvice istokenExpired check start");
             if (jwtTokenService.isTokenExpired(accessToken)) {
                 handleExpiredAccessToken(response, refreshToken, accessToken);
                 return;
@@ -54,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            log.error("Error during JWT processing: {}", e.getMessage());
+            log.warn("Error during JWT processing: {}", e);
             handleServerError(response, "Invalid access");
         }
     }
@@ -69,6 +69,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private void handleExpiredAccessToken(HttpServletResponse response, String refreshToken, String accessToken) throws IOException {
+        log.info("check refreshToken time");
         if (refreshToken != null && jwtTokenService.isTokenValidate(refreshToken)) {
             String userId = jwtTokenService.getUserIdFromToken(accessToken);
             String newAccessToken = jwtTokenService.createAcecssToken(userId);

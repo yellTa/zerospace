@@ -25,11 +25,11 @@ public class MemberServiceImpl {
 
 
     public boolean hasMember(String email) {
-        Member foundMember = memberRepository.findMemberByEmail(email);
-        if(foundMember ==null){
-            return false;
-        }else{
+        try {
+            Member foundMember = memberRepository.findMemberByEmail(email);
             return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -46,7 +46,8 @@ public class MemberServiceImpl {
 
         return foundMember.getUserId();
     }
-    public String getMemberEmailfromUserId(String userId){
+
+    public String getMemberEmailfromUserId(String userId) {
         Member foundMember = memberRepository.findMemberByuserId(userId);
 
         return foundMember.getEmail();
