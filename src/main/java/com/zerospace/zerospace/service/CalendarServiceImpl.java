@@ -89,7 +89,7 @@ public class CalendarServiceImpl {
                     return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
-        } catch (LoginFailedException e) {
+        } catch (Exception e) {
             log.info("hourplace 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -109,7 +109,7 @@ public class CalendarServiceImpl {
                     return new ResponseEntity<>("알 수 없는 에러가 발생했습니다. 다시 시도해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
-        } catch (LoginFailedException e) {
+        } catch (Exception e) {
             log.info("spacecloud 알 수 없는 에러 발생");
             return new ResponseEntity<>("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }

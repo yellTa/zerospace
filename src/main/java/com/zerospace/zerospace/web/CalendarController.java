@@ -49,6 +49,8 @@ public class CalendarController {
 
         // CalendarService에서 월별 데이터를 조회하고 반환
         ResponseEntity<?> response = calendarService.getCalendarInfoByMonth(request, month, year);
+
+        log.info("month get Data ={}", response.getBody());
         return response;
     }
 

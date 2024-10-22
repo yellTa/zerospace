@@ -47,7 +47,9 @@ public class CrawlingLogic {
 //                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             } catch (Exception e) {
                 log.info(e.toString());
-                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
+                log.info("알 수 없는 에러 발생");
+                return null;
+//                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             }
         } else if (platform.equals("spacecloud")) {
             try {
@@ -64,7 +66,7 @@ public class CrawlingLogic {
 //                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
             } catch (Exception e) {
                 log.info(e.toString());
-                throw new LoginFailedException("알 수 없는 에러가 발생했습니다.");
+                return null;
             }
         }
 

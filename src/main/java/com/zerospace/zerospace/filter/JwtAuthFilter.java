@@ -47,6 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("jwtTokenSErvice istokenExpired check start");
             if (jwtTokenService.isTokenExpired(accessToken)) {
                 handleExpiredAccessToken(response, refreshToken, accessToken);
+                filterChain.doFilter(request, response);
                 return;
             }
 
@@ -77,6 +78,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("New accessToken issued for userId: {}", userId);
         } else {
             handleUnauthorized(response, "Invalid refreshToken");
+            response.sendRedirect("https://zzerospace.store:8443/login/oauth2/code/kakao");
         }
     }
 
